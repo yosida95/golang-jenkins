@@ -108,5 +108,5 @@ func (jenkins *Jenkins) GetBuild(job Job, number int) (build Build, err error) {
 }
 
 func (jenkins *Jenkins) Build(job Job, params url.Values) error {
-	return jenkins.post(fmt.Sprintf("/job/%s/buildWithParameters"), params, nil)
+	return jenkins.post(fmt.Sprintf("/job/%s/buildWithParameters", job.Name), params, nil)
 }
