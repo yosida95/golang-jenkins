@@ -111,8 +111,8 @@ func (jenkins *Jenkins) GetBuild(job Job, number int) (build Build, err error) {
 // Params can be nil.
 func (jenkins *Jenkins) Build(job Job, params url.Values) error {
 	if params == nil {
-		return jenkins.post(fmt.Sprintf("/job/%s/buildWithParameters", job.Name), params, nil)
-	} else {
 		return jenkins.post(fmt.Sprintf("/job/%s/build", job.Name), params, nil)
+	} else {
+		return jenkins.post(fmt.Sprintf("/job/%s/buildWithParameters", job.Name), params, nil)
 	}
 }
