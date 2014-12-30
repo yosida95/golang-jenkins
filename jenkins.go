@@ -64,7 +64,7 @@ func (jenkins *Jenkins) get(path string, params url.Values, body interface{}) (e
 		return
 	}
 
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := jenkins.sendRequest(req)
 	if err != nil {
 		return
 	}
