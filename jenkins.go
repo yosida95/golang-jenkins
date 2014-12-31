@@ -119,7 +119,7 @@ func (jenkins *Jenkins) Build(job Job, params url.Values) error {
 
 // Get the console output from a build.
 func (jenkins *Jenkins) GetBuildConsoleOutput(build Build) ([]byte, error) {
-	requestUrl := fmt.Sprintf("%s/logText/progressiveText?start=0", build.Url)
+	requestUrl := fmt.Sprintf("%s/consoleText", build.Url)
 	req, err := http.NewRequest("GET", requestUrl, nil)
 	if err != nil {
 		return nil, err
