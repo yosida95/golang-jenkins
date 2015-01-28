@@ -119,3 +119,20 @@ func (jenkins *Jenkins) Build(job Job, params url.Values) error {
 		return jenkins.post(fmt.Sprintf("/job/%s/buildWithParameters", job.Name), params, nil)
 	}
 }
+
+// Get the console output from a build.
+func (jenkins *Jenkins) GetBuildConsoleOutput(build Build) ([]byte, error) {
+	requestUrl := fmt.Sprintf("%s/consoleText", build.Url)
+	req, err := http.NewRequest("GET", requestUrl, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	res, err := jenkins.sendRequest(req)
+	if err != nil {
+		return nil, err
+	}
+
+	defer res.Body.Close()
+	return ioutil.ReadAll(res.Body)
+}
