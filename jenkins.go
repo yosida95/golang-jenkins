@@ -68,7 +68,6 @@ func (jenkins *Jenkins) get(path string, params url.Values, body interface{}) (e
 	if err != nil {
 		return
 	}
-
 	return jenkins.parseResponse(resp, body)
 }
 
@@ -88,14 +87,12 @@ func (jenkins *Jenkins) post(path string, params url.Values, body interface{}) (
 }
 
 // GetJobs returns all jobs you can read.
-func (jenkins *Jenkins) GetJobs() (jobs []Job, err error) {
+func (jenkins *Jenkins) GetJobs() ([]Job, error) {
 	var payload = struct {
 		Jobs []Job `json:"jobs"`
-	}{
-		Jobs: jobs,
-	}
-	err = jenkins.get("", nil, &payload)
-	return
+	}{}
+	err := jenkins.get("", nil, &payload)
+	return payload.Jobs, err
 }
 
 // GetJob returns a job which has specified name.
