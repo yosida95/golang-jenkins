@@ -133,3 +133,10 @@ func (jenkins *Jenkins) GetBuildConsoleOutput(build Build) ([]byte, error) {
 	defer res.Body.Close()
 	return ioutil.ReadAll(res.Body)
 }
+
+// GetJob returns a job which has specified name.
+func (jenkins *Jenkins) GetQueue() (queue Queue, err error) {
+	err = jenkins.get(fmt.Sprintf("/queue/api/json"), nil, &queue)
+	return
+}
+
