@@ -1,8 +1,12 @@
 package gojenkins
 
 import (
+	"bytes"
 	"encoding/json"
+	"encoding/xml"
+	"errors"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -40,6 +44,21 @@ func (jenkins *Jenkins) buildUrl(path string, params url.Values) (requestUrl str
 func (jenkins *Jenkins) sendRequest(req *http.Request) (*http.Response, error) {
 	req.SetBasicAuth(jenkins.auth.Username, jenkins.auth.ApiToken)
 	return http.DefaultClient.Do(req)
+}
+
+func (jenkins *Jenkins) parseXmlResponse(resp *http.Response, body interface{}) (err error) {
+	defer resp.Body.Close()
+
+	if body == nil {
+		return
+	}
+
+	data, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return
+	}
+
+	return xml.Unmarshal(data, body)
 }
 
 func (jenkins *Jenkins) parseResponse(resp *http.Response, body interface{}) (err error) {
@@ -85,6 +104,31 @@ func (jenkins *Jenkins) post(path string, params url.Values, body interface{}) (
 
 	return jenkins.parseResponse(resp, body)
 }
+func (jenkins *Jenkins) postXml(path string, params url.Values, xmlBody io.Reader, body interface{}) (err error) {
+	requestUrl := jenkins.baseUrl + path
+	if params != nil {
+		queryString := params.Encode()
+		if queryString != "" {
+			requestUrl = requestUrl + "?" + queryString
+		}
+	}
+
+	req, err := http.NewRequest("POST", requestUrl, xmlBody)
+	if err != nil {
+		return
+	}
+
+	req.Header.Add("Content-Type", "application/xml")
+	resp, err := jenkins.sendRequest(req)
+	if err != nil {
+		return
+	}
+	if resp.StatusCode != 200 {
+		return errors.New(fmt.Sprintf("error: HTTP POST returned status code returned: %d", resp.StatusCode))
+	}
+
+	return jenkins.parseXmlResponse(resp, body)
+}
 
 // GetJobs returns all jobs you can read.
 func (jenkins *Jenkins) GetJobs() ([]Job, error) {
@@ -105,6 +149,15 @@ func (jenkins *Jenkins) GetJob(name string) (job Job, err error) {
 func (jenkins *Jenkins) GetBuild(job Job, number int) (build Build, err error) {
 	err = jenkins.get(fmt.Sprintf("/job/%s/%d", job.Name, number), nil, &build)
 	return
+}
+
+// Create a new job
+func (jenkins *Jenkins) CreateJob(mavenJobItem MavenJobItem, jobName string) error {
+	mavenJobItemXml, _ := xml.Marshal(mavenJobItem)
+	reader := bytes.NewReader(mavenJobItemXml)
+	params := url.Values{"name": []string{jobName}}
+
+	return jenkins.postXml("/createItem", params, reader, nil)
 }
 
 // Create a new build for this job.
