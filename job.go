@@ -48,6 +48,7 @@ type MavenJobItem struct {
 	BlockBuildWhenUpstreamBuilding   string               `xml:"blockBuildWhenUpstreamBuilding"`
 	Triggers                         Triggers             `xml:"triggers"`
 	ConcurrentBuild                  string               `xml:"concurrentBuild"`
+	Goals                            string               `xml:"goals"`
 	AggregatorStyleBuild             string               `xml:"aggregatorStyleBuild"`
 	IncrementalBuild                 string               `xml:"incrementalBuild"`
 	IgnoreUpstremChanges             string               `xml:"ignoreUpstremChanges"`
