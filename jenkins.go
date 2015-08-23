@@ -160,6 +160,12 @@ func (jenkins *Jenkins) CreateJob(mavenJobItem MavenJobItem, jobName string) err
 	return jenkins.postXml("/createItem", params, reader, nil)
 }
 
+// Add job to view
+func (jenkins *Jenkins) AddJobToView(viewName string, job Job) error {
+	params := url.Values{"name": []string{job.Name}}
+	return jenkins.post(fmt.Sprintf("/view/%s/addJobToView", viewName), params, nil)
+}
+
 // Create a new build for this job.
 // Params can be nil.
 func (jenkins *Jenkins) Build(job Job, params url.Values) error {

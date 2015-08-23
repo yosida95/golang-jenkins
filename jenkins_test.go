@@ -24,6 +24,32 @@ func Test(t *testing.T) {
 	}
 }
 
+func TestAddJobToView(t *testing.T) {
+	jenkins := NewJenkinsWithTestData()
+
+	scm := Scm{
+		Class: "hudson.scm.SubversionSCM",
+	}
+	jobItem := MavenJobItem{
+		Plugin:               "maven-plugin@2.7.1",
+		Description:          "test description",
+		Scm:                  scm,
+		Triggers:             Triggers{},
+		RunPostStepsIfResult: RunPostStepsIfResult{},
+		Settings:             JobSettings{Class: "jenkins.mvn.DefaultSettingsProvider"},
+		GlobalSettings:       JobSettings{Class: "jenkins.mvn.DefaultSettingsProvider"},
+	}
+	newJobName := fmt.Sprintf("test-with-view-%d", time.Now().UnixNano())
+	jenkins.CreateJob(jobItem, newJobName)
+
+	job := Job{Name: newJobName}
+	err := jenkins.AddJobToView("test", job)
+
+	if err != nil {
+		t.Errorf("error %v\n", err)
+	}
+}
+
 func TestCreateJobItem(t *testing.T) {
 	jenkins := NewJenkinsWithTestData()
 	scm := Scm{
