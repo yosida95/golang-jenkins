@@ -166,6 +166,15 @@ func (jenkins *Jenkins) AddJobToView(viewName string, job Job) error {
 	return jenkins.post(fmt.Sprintf("/view/%s/addJobToView", viewName), params, nil)
 }
 
+// Create a new view
+func (jenkins *Jenkins) CreateView(listView ListView) error {
+	xmlListView, _ := xml.Marshal(listView)
+	reader := bytes.NewReader(xmlListView)
+	params := url.Values{"name": []string{listView.Name}}
+
+	return jenkins.postXml("/createView", params, reader, nil)
+}
+
 // Create a new build for this job.
 // Params can be nil.
 func (jenkins *Jenkins) Build(job Job, params url.Values) error {

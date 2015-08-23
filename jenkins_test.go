@@ -50,6 +50,17 @@ func TestAddJobToView(t *testing.T) {
 	}
 }
 
+func TestCreateView(t *testing.T) {
+	jenkins := NewJenkinsWithTestData()
+
+	newViewName := fmt.Sprintf("test-view-%d", time.Now().UnixNano())
+	err := jenkins.CreateView(NewListView(newViewName))
+
+	if err != nil {
+		t.Errorf("error %v\n", err)
+	}
+}
+
 func TestCreateJobItem(t *testing.T) {
 	jenkins := NewJenkinsWithTestData()
 	scm := Scm{
