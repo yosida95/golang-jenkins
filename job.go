@@ -1,5 +1,7 @@
 package gojenkins
 
+import "encoding/xml"
+
 type Build struct {
 	Id     string `json:"id"`
 	Number int    `json:"number"`
@@ -63,6 +65,7 @@ type MavenJobItem struct {
 	Settings                         JobSettings          `xml:"settings"`
 	GlobalSettings                   JobSettings          `xml:"globalSettings"`
 	RunPostStepsIfResult             RunPostStepsIfResult `xml:"runPostStepsIfResult"`
+	Postbuilders                     PostBuilders         `xml:"postbuilders"`
 }
 
 type Scm struct {
@@ -94,6 +97,20 @@ type ScmSvnLocation struct {
 	DepthOption           string   `xml:"depthOption"`
 	IgnoreExternalsOption string   `xml:"ignoreExternalsOption"`
 }
+
+type PostBuilders struct {
+	XMLName     xml.Name `xml:"postbuilders"`
+	PostBuilder []PostBuilder
+}
+
+type PostBuilder interface {
+}
+
+type ShellBuilder struct {
+	XMLName xml.Name `xml:"hudson.tasks.Shell"`
+	Command string   `xml:"command"`
+}
+
 type JobSettings struct {
 	Class      string `xml:"class,attr"`
 	JobSetting []JobSetting
