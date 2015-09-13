@@ -40,10 +40,12 @@ func TestAddJobToView(t *testing.T) {
 		GlobalSettings:       JobSettings{Class: "jenkins.mvn.DefaultSettingsProvider"},
 	}
 	newJobName := fmt.Sprintf("test-with-view-%d", time.Now().UnixNano())
+	newViewName := fmt.Sprintf("test-view-%d", time.Now().UnixNano())
 	jenkins.CreateJob(jobItem, newJobName)
+	jenkins.CreateView(NewListView(newViewName))
 
 	job := Job{Name: newJobName}
-	err := jenkins.AddJobToView("test", job)
+	err := jenkins.AddJobToView(newViewName, job)
 
 	if err != nil {
 		t.Errorf("error %v\n", err)

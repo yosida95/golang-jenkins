@@ -24,24 +24,24 @@ type Columns struct {
 }
 
 type StatusColumn struct {
-	XMLName xml.Name `xml:"hudson.view.StatusColumn"`
+	XMLName xml.Name `xml:"hudson.views.StatusColumn"`
 }
 type WeatherColumn struct {
-	XMLName xml.Name `xml:"hudson.view.WeatherColumn"`
+	XMLName xml.Name `xml:"hudson.views.WeatherColumn"`
 }
 
 type JobColumn struct {
-	XMLName xml.Name `xml:"hudson.view.JobColumn"`
+	XMLName xml.Name `xml:"hudson.views.JobColumn"`
 }
 type LastSuccessColumn struct {
-	XMLName xml.Name `xml:"hudson.view.LastSuccessColumn"`
+	XMLName xml.Name `xml:"hudson.views.LastSuccessColumn"`
 }
 type LastFailureColumn struct {
-	XMLName xml.Name `xml:"hudson.view.LastFailureColumn"`
+	XMLName xml.Name `xml:"hudson.views.LastFailureColumn"`
 }
 type LastDurationColumn struct {
-	XMLName xml.Name `xml:"hudson.view.LastDurationColumn"`
+	XMLName xml.Name `xml:"hudson.views.LastDurationColumn"`
 }
 type BuildButtonColumn struct {
-	XMLName xml.Name `xml:"hudson.view.BuildButtonColumn"`
+	XMLName xml.Name `xml:"hudson.views.BuildButtonColumn"`
 }
