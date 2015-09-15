@@ -45,7 +45,7 @@ type Job struct {
 }
 
 type Health struct {
-	Description string `json:"Description"`
+	Description string `json:"description"`
 }
 
 type MavenJobItem struct {
