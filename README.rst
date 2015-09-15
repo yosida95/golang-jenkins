@@ -1,8 +1,9 @@
+golang-jenkins
+==============
+
 .. image:: https://badge.waffle.io/akashshinde/golang-jenkins.png?label=ready&title=Ready 
  :target: https://waffle.io/akashshinde/golang-jenkins
  :alt: 'Stories in Ready'
-golang-jenkins
-==============
 
 .. image:: https://badges.gitter.im/Join%20Chat.svg
    :alt: Join the chat at https://gitter.im/akashshinde/golang-jenkins
