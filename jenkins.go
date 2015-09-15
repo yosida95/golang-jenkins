@@ -10,6 +10,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"strings"
 )
 
 type Auth struct {
@@ -30,14 +31,18 @@ func NewJenkins(auth *Auth, baseUrl string) *Jenkins {
 }
 
 func (jenkins *Jenkins) buildUrl(path string, params url.Values) (requestUrl string) {
-	requestUrl = jenkins.baseUrl + path + "/api/json"
+	if params == nil {
+		requestUrl = jenkins.baseUrl + "job/" + path
+		if !strings.Contains(path, "/api/json") {
+			requestUrl = jenkins.baseUrl + path + "/api/json"
+		}
+	}
 	if params != nil {
 		queryString := params.Encode()
 		if queryString != "" {
 			requestUrl = requestUrl + "?" + queryString
 		}
 	}
-
 	return
 }
 
@@ -48,11 +53,9 @@ func (jenkins *Jenkins) sendRequest(req *http.Request) (*http.Response, error) {
 
 func (jenkins *Jenkins) parseXmlResponse(resp *http.Response, body interface{}) (err error) {
 	defer resp.Body.Close()
-
 	if body == nil {
 		return
 	}
-
 	data, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return

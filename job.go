@@ -1,6 +1,13 @@
 package gojenkins
 
-import "encoding/xml"
+import (
+	"encoding/json"
+	"encoding/xml"
+	"errors"
+	"fmt"
+	"io/ioutil"
+	"net/http"
+)
 
 type Build struct {
 	Id     string `json:"id"`
@@ -140,4 +147,35 @@ type RunPostStepsIfResult struct {
 	Ordinal       string `xml:"ordinal"`
 	Color         string `xml:"color"`
 	CompleteBuild string `xml:"completeBuild"`
+}
+type Artifacts struct {
+	Artifact []Artifact `json:"artifacts"`
+}
+type Artifact struct {
+	DisplayPath  string `json:"displayPath"`
+	FileName     string `json:"fileName"`
+	RelativePath string `json:"relativePath"`
+}
+
+func (job *Job) getArtifacts(jenkins *Jenkins, listOfArtifacts *Artifacts) error {
+	requestUrl := jenkins.buildUrl(job.Name+"/lastSuccessfulBuild/api/json?tree=artifacts[*]", nil)
+	fmt.Println("request url is ", requestUrl)
+	req, err := http.NewRequest("GET", requestUrl, nil)
+	if err != nil {
+		return errors.New("error in http requesr")
+	}
+	resp, err := jenkins.sendRequest(req)
+	if err != nil {
+		return errors.New("Error while getting response from jenkins server")
+	}
+	data, err := ioutil.ReadAll(resp.Body)
+	fmt.Println("response is %s", resp.Body)
+	if err != nil {
+		return errors.New("Error while converting data to byte array")
+	}
+	err = json.Unmarshal(data, &listOfArtifacts)
+	if err != nil {
+		return errors.New("json unmarsaling failed")
+	}
+	return nil
 }
