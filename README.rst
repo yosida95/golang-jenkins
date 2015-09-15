@@ -1,7 +1,7 @@
 golang-jenkins
 ==============
 
-.. image:: https://badge.waffle.io/akashshinde/golang-jenkins.png?label=done&title=Ready 
+.. image:: https://badge.waffle.io/akashshinde/golang-jenkins.png?label=ready&title=Ready 
  :target: https://waffle.io/akashshinde/golang-jenkins
  :alt: 'Stories in Ready'
 
