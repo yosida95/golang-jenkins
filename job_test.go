@@ -7,12 +7,16 @@ import (
 
 func TestGetArtifacts(t *testing.T) {
 	jenkins := NewJenkinsWithTestData()
-	job, err := jenkins.GetJob("live-neo-unit-tests")
+	job, err := jenkins.GetJob("job_name_example")
 	fmt.Println("job is %+v", job)
 	if err != nil {
 		fmt.Println(err)
+		t.Errorf("job is not fetched")
 	}
 	var artifacts Artifacts
-	job.getArtifacts(jenkins, &artifacts)
-	fmt.Println("job Artifacts are  %+v", artifacts)
+	err = job.getArtifacts(jenkins, &artifacts)
+	if err != nil {
+		t.Errorf("Falied to get Artifacts")
+	}
+	t.Log("Job artifacts are fetched successfully")
 }
