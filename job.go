@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"encoding/xml"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 )
@@ -158,6 +159,7 @@ type Artifact struct {
 
 func (job *Job) getArtifacts(jenkins *Jenkins, listOfArtifacts *Artifacts) error {
 	requestUrl := jenkins.buildUrl(job.Name+"/lastSuccessfulBuild/api/json?tree=artifacts[*]", nil)
+	fmt.Println("request url is ", requestUrl)
 	req, err := http.NewRequest("GET", requestUrl, nil)
 	if err != nil {
 		return errors.New("error in http requesr")
@@ -167,6 +169,7 @@ func (job *Job) getArtifacts(jenkins *Jenkins, listOfArtifacts *Artifacts) error
 		return errors.New("Error while getting response from jenkins server")
 	}
 	data, err := ioutil.ReadAll(resp.Body)
+	fmt.Println("response is %s", resp.Body)
 	if err != nil {
 		return errors.New("Error while converting data to byte array")
 	}
