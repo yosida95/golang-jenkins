@@ -24,9 +24,10 @@ type Job struct {
 	Url   string `json:"url"`
 	Color string `json:"color"`
 
-	Buildable   bool   `json:"buildable"`
-	DisplayName string `json:"displayName"`
-	Description string `json:"description"`
+	Buildable    bool     `json:"buildable"`
+	DisplayName  string   `json:"displayName"`
+	Description  string   `json:"description"`
+	HealthReport []Health `json:"healthReport"`
 
 	LastCompletedBuild    Build `json:"lastCompletedBuild"`
 	LastFailedBuild       Build `json:"lastFailedBuild"`
@@ -34,6 +35,10 @@ type Job struct {
 	LastSuccessfulBuild   Build `json:"lastSuccessfulBuild"`
 	LastUnstableBuild     Build `json:"lastUnstableBuild"`
 	LastUnsuccessfulBuild Build `json:"lastUnsuccessfulBuild"`
+}
+
+type Health struct {
+	Description string `json:"Description"`
 }
 
 type MavenJobItem struct {
@@ -135,4 +140,12 @@ type RunPostStepsIfResult struct {
 	Ordinal       string `xml:"ordinal"`
 	Color         string `xml:"color"`
 	CompleteBuild string `xml:"completeBuild"`
+}
+type Artifacts struct {
+	Artifact []Artifact `json:"artifacts"`
+}
+type Artifact struct {
+	DisplayPath  string `json:"displayPath"`
+	FileName     string `json:"fileName"`
+	RelativePath string `json:"relativePath"`
 }
