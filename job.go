@@ -2,6 +2,12 @@ package gojenkins
 
 import "encoding/xml"
 
+type Artifact struct {
+	DisplayPath  string `json:"displayPath"`
+	FileName     string `json:"fileName"`
+	RelativePath string `json:"relativePath"`
+}
+
 type Build struct {
 	Id     string `json:"id"`
 	Number int    `json:"number"`
@@ -17,6 +23,8 @@ type Build struct {
 	Building bool   `json:"building"`
 	KeepLog  bool   `json:"keepLog"`
 	Result   string `json:"result"`
+
+	Artifacts []Artifact `json:"artifacts"`
 }
 
 type Job struct {

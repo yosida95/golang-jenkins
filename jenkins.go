@@ -207,3 +207,20 @@ func (jenkins *Jenkins) GetQueue() (queue Queue, err error) {
 	err = jenkins.get(fmt.Sprintf("/queue"), nil, &queue)
 	return
 }
+
+// GetArtifact return the content of a build artifact
+func (jenkins *Jenkins) GetArtifact(build Build, artifact Artifact) ([]byte, error) {
+	requestUrl := fmt.Sprintf("%s/artifact/%s", build.Url, artifact.RelativePath)
+	req, err := http.NewRequest("GET", requestUrl, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	res, err := jenkins.sendRequest(req)
+	if err != nil {
+		return nil, err
+	}
+
+	defer res.Body.Close()
+	return ioutil.ReadAll(res.Body)
+}
