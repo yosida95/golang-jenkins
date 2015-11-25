@@ -90,6 +90,20 @@ func (jenkins *Jenkins) get(path string, params url.Values, body interface{}) (e
 	return jenkins.parseResponse(resp, body)
 }
 
+func (jenkins *Jenkins) getXml(path string, params url.Values, body interface{}) (err error) {
+	requestUrl := jenkins.buildUrl(path, params)
+	req, err := http.NewRequest("GET", requestUrl, nil)
+	if err != nil {
+		return
+	}
+
+	resp, err := jenkins.sendRequest(req)
+	if err != nil {
+		return
+	}
+	return jenkins.parseXmlResponse(resp, body)
+}
+
 func (jenkins *Jenkins) post(path string, params url.Values, body interface{}) (err error) {
 	requestUrl := jenkins.buildUrl(path, params)
 	req, err := http.NewRequest("POST", requestUrl, nil)
@@ -142,6 +156,12 @@ func (jenkins *Jenkins) GetJobs() ([]Job, error) {
 // GetJob returns a job which has specified name.
 func (jenkins *Jenkins) GetJob(name string) (job Job, err error) {
 	err = jenkins.get(fmt.Sprintf("/job/%s", name), nil, &job)
+	return
+}
+
+//GetJobConfig returns a maven job, has the one used to create Maven job
+func (jenkins *Jenkins) GetJobConfig(name string) (job MavenJobItem, err error) {
+	err = jenkins.getXml(fmt.Sprintf("/job/%s/config.xml", name), nil, &job)
 	return
 }
 
