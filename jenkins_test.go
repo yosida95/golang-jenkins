@@ -66,16 +66,18 @@ func TestCreateView(t *testing.T) {
 func TestCreateJobItem(t *testing.T) {
 	jenkins := NewJenkinsWithTestData()
 	scm := Scm{
-		Locations: Locations{
-			[]Location{
-				ScmSvnLocation{IgnoreExternalsOption: "false", DepthOption: "infinity", Local: ".", Remote: "http://some-svn-url"},
+		ScmContent: ScmSvn{
+			Locations: Locations{
+				[]ScmSvnLocation{
+					ScmSvnLocation{IgnoreExternalsOption: "false", DepthOption: "infinity", Local: ".", Remote: "http://some-svn-url"},
+				},
 			},
+			IgnoreDirPropChanges: "false",
+			FilterChanglog:       "false",
+			WorkspaceUpdater:     WorkspaceUpdater{Class: "hudson.scm.subversion.UpdateUpdater"},
 		},
-		Class:                "hudson.scm.SubversionSCM",
-		Plugin:               "subversion@1.54",
-		IgnoreDirPropChanges: "false",
-		FilterChanglog:       "false",
-		WorkspaceUpdater:     WorkspaceUpdater{Class: "hudson.scm.subversion.UpdateUpdater"},
+		Class:  "hudson.scm.SubversionSCM",
+		Plugin: "subversion@1.54",
 	}
 	triggers := Triggers{[]Trigger{ScmTrigger{}}}
 	postStep := RunPostStepsIfResult{Name: "FAILURE", Ordinal: "2", Color: "RED", CompleteBuild: "true"}

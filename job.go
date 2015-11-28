@@ -72,7 +72,9 @@ type MavenJobItem struct {
 	FingerprintingDisabled           string               `xml:"fingerprintingDisabled"`
 	ResolveDependencies              string               `xml:"resolveDependencies"`
 	ProcessPlugins                   string               `xml:"processPlugins"`
+	MavenName                        string               `xml:"mavenName"`
 	MavenValidationLevel             string               `xml:"mavenValidationLevel"`
+	DefaultGoals                     string               `xml:"defaultGoals"`
 	RunHeadless                      string               `xml:"runHeadless"`
 	DisableTriggerDownstreamProjects string               `xml:"disableTriggerDownstreamProjects"`
 	Settings                         JobSettings          `xml:"settings"`
@@ -82,9 +84,15 @@ type MavenJobItem struct {
 }
 
 type Scm struct {
+	ScmContent
+	Class  string `xml:"class,attr"`
+	Plugin string `xml:"plugin,attr"`
+}
+
+type ScmContent interface{}
+
+type ScmSvn struct {
 	Locations              Locations        `xml:"locations"`
-	Class                  string           `xml:"class,attr"`
-	Plugin                 string           `xml:"plugin,attr"`
 	ExcludedRegions        string           `xml:"excludedRegions"`
 	IncludedRegions        string           `xml:"includedRegions"`
 	ExcludedUsers          string           `xml:"excludedUsers"`
@@ -99,16 +107,14 @@ type WorkspaceUpdater struct {
 	Class string `xml:"class,attr"`
 }
 type Locations struct {
-	Location []Location
+	Location []ScmSvnLocation `xml:"hudson.scm.SubversionSCM_-ModuleLocation"`
 }
-type Location interface {
-}
+
 type ScmSvnLocation struct {
-	XMLName               struct{} `xml:"hudson.scm.SubversionSCM_-ModuleLocation"`
-	Remote                string   `xml:"remote"`
-	Local                 string   `xml:"local"`
-	DepthOption           string   `xml:"depthOption"`
-	IgnoreExternalsOption string   `xml:"ignoreExternalsOption"`
+	Remote                string `xml:"remote"`
+	Local                 string `xml:"local"`
+	DepthOption           string `xml:"depthOption"`
+	IgnoreExternalsOption string `xml:"ignoreExternalsOption"`
 }
 
 type PostBuilders struct {
@@ -148,4 +154,75 @@ type RunPostStepsIfResult struct {
 	Ordinal       string `xml:"ordinal"`
 	Color         string `xml:"color"`
 	CompleteBuild string `xml:"completeBuild"`
+}
+
+type ScmGit struct {
+	UserRemoteConfigs                 UserRemoteConfigs `xml:"userRemoteConfigs"`
+	Branches                          Branches          `xml:"branches"`
+	DoGenerateSubmoduleConfigurations bool              `xml:"doGenerateSubmoduleConfigurations"`
+	GitBrowser                        GitBrowser        `xml:"browser"`
+	GitSubmoduleCfg                   GitSubmoduleCfg   `xml:"submoduleCfg"`
+	GitExtensions                     GitExtensions     `xml:"extensions"`
+}
+
+type UserRemoteConfigs struct {
+	UserRemoteConfig UserRemoteConfig `xml:"hudson.plugins.git.UserRemoteConfig"`
+}
+
+type UserRemoteConfig struct {
+	Urls []string `xml:"url"`
+}
+
+type Branches struct {
+	BranchesSpec []BranchesSpec `xml:"hudson.plugins.git.BranchSpec"`
+}
+
+type BranchesSpec struct {
+	Name string `xml:"name"`
+}
+
+type GitBrowser struct {
+	Class       string `xml:"class,attr"`
+	Url         string `xml:"url"`
+	ProjectName string `xml:"projectName"`
+}
+
+type GitSubmoduleCfg struct {
+	Class string `xml:"class,attr"`
+}
+
+type GitExtensions struct {
+	Class       string      `xml:"class,attr"`
+	LocalBranch LocalBranch `xml:"hudson.plugins.git.extensions.impl.LocalBranch"`
+}
+
+type LocalBranch struct {
+	LocalBranch string `xml:"localBranch"`
+}
+
+//UnmarshalXML implements xml.UnmarshalXML intrface
+//Decode between multiple types of Scm. for now only SVN is supported
+func (iscm *Scm) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
+	for _, v := range start.Attr {
+		if v.Name.Local == "class" {
+			iscm.Class = v.Value
+		} else if v.Name.Local == "plugin" {
+			iscm.Plugin = v.Value
+		}
+	}
+	switch iscm.Class {
+	case "hudson.scm.SubversionSCM":
+		iscm.ScmContent = &ScmSvn{}
+		err := d.DecodeElement(&iscm.ScmContent, &start)
+		if err != nil {
+			return err
+		}
+	case "hudson.plugins.git.GitSCM":
+		iscm.ScmContent = &ScmGit{}
+		err := d.DecodeElement(&iscm.ScmContent, &start)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
