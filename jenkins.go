@@ -42,7 +42,9 @@ func (jenkins *Jenkins) buildUrl(path string, params url.Values) (requestUrl str
 }
 
 func (jenkins *Jenkins) sendRequest(req *http.Request) (*http.Response, error) {
-	req.SetBasicAuth(jenkins.auth.Username, jenkins.auth.ApiToken)
+	if jenkins.auth != nil {
+		req.SetBasicAuth(jenkins.auth.Username, jenkins.auth.ApiToken)
+	}
 	return http.DefaultClient.Do(req)
 }
 
