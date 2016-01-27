@@ -246,3 +246,24 @@ func (jenkins *Jenkins) GetArtifact(build Build, artifact Artifact) ([]byte, err
 	defer res.Body.Close()
 	return ioutil.ReadAll(res.Body)
 }
+
+// GetComputerObject returns the main ComputerObject
+func (jenkins *Jenkins) GetComputerObject() (co ComputerObject, err error) {
+	err = jenkins.get(fmt.Sprintf("/computer"), nil, &co)
+	return
+}
+
+// GetComputers returns the list of all Computer objects
+func (jenkins *Jenkins) GetComputers() ([]Computer, error) {
+	var payload = struct {
+		Computers []Computer `json:"computer"`
+	}{}
+	err := jenkins.get("/computer", nil, &payload)
+	return payload.Computers, err
+}
+
+// GetComputer returns a Computer object with a specified name.
+func (jenkins *Jenkins) GetComputer(name string) (computer Computer, err error) {
+	err = jenkins.get(fmt.Sprintf("/computer/%s", name), nil, &computer)
+	return
+}
