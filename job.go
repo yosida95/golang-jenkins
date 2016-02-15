@@ -25,6 +25,19 @@ type Build struct {
 	Result   string `json:"result"`
 
 	Artifacts []Artifact `json:"artifacts"`
+	Actions   []Action   `json:"actions"`
+}
+
+type Parameter struct {
+	Name  string `json:"Name"`
+	Value string `json:"Value"`
+}
+
+type UpstreamCause struct {
+	ShortDescription string `json:"shortDescription"`
+	UpstreamBuild    int    `json:"UpstreamBuild"`
+	UpstreamProject  string `json:"UpstreamProject"`
+	UpstreamUrl      string `json:"UpstreamUrl"`
 }
 
 type Job struct {
