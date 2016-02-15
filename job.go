@@ -28,11 +28,6 @@ type Build struct {
 	Actions   []Action   `json:"actions"`
 }
 
-type Parameter struct {
-	Name  string `json:"Name"`
-	Value string `json:"Value"`
-}
-
 type UpstreamCause struct {
 	ShortDescription string `json:"shortDescription"`
 	UpstreamBuild    int    `json:"UpstreamBuild"`
