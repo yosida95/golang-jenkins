@@ -30,9 +30,9 @@ type Build struct {
 
 type UpstreamCause struct {
 	ShortDescription string `json:"shortDescription"`
-	UpstreamBuild    int    `json:"UpstreamBuild"`
-	UpstreamProject  string `json:"UpstreamProject"`
-	UpstreamUrl      string `json:"UpstreamUrl"`
+	UpstreamBuild    int    `json:"upstreamBuild"`
+	UpstreamProject  string `json:"upstreamProject"`
+	UpstreamUrl      string `json:"upstreamUrl"`
 }
 
 type Job struct {
