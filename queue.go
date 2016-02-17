@@ -20,13 +20,14 @@ type Item struct {
 }
 
 type Action struct {
-	Causes []Cause
+	Causes []Cause `json:"causes"`
 }
 
 type Cause struct {
 	ShortDescription string `json:"shortDescription"`
 	UserId           string `json:"userId"`
 	UserName         string `json:"userName"`
+	UpstreamCause
 }
 
 type Task struct {
