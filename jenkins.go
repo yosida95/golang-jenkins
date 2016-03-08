@@ -173,6 +173,12 @@ func (jenkins *Jenkins) GetBuild(job Job, number int) (build Build, err error) {
 	return
 }
 
+// GetLastBuild returns the last build of specified job.
+func (jenkins *Jenkins) GetLastBuild(job Job) (build Build, err error) {
+	err = jenkins.get(fmt.Sprintf("/job/%s/lastBuild", job.Name), nil, &build)
+	return
+}
+
 // Create a new job
 func (jenkins *Jenkins) CreateJob(mavenJobItem MavenJobItem, jobName string) error {
 	mavenJobItemXml, _ := xml.Marshal(mavenJobItem)
