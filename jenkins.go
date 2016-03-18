@@ -206,10 +206,10 @@ func (jenkins *Jenkins) CreateView(listView ListView) error {
 // Create a new build for this job.
 // Params can be nil.
 func (jenkins *Jenkins) Build(job Job, params url.Values) error {
-	if params == nil {
-		return jenkins.post(fmt.Sprintf("/job/%s/build", job.Name), params, nil)
-	} else {
+	if hasParams(job) {
 		return jenkins.post(fmt.Sprintf("/job/%s/buildWithParameters", job.Name), params, nil)
+	} else {
+		return jenkins.post(fmt.Sprintf("/job/%s/build", job.Name), params, nil)
 	}
 }
 
@@ -293,4 +293,14 @@ func (jenkins *Jenkins) GetComputers() ([]Computer, error) {
 func (jenkins *Jenkins) GetComputer(name string) (computer Computer, err error) {
 	err = jenkins.get(fmt.Sprintf("/computer/%s", name), nil, &computer)
 	return
+}
+
+// hasParams returns a boolean value indicating if the job is parameterized
+func hasParams(job Job) bool {
+	for _, action := range job.Actions {
+		if len(action.ParameterDefinitions) > 0 {
+			return true
+		}
+	}
+	return false
 }
