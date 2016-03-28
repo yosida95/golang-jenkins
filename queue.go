@@ -20,7 +20,8 @@ type Item struct {
 }
 
 type Action struct {
-	Causes []Cause `json:"causes"`
+	Causes               []Cause               `json:"causes"`
+	ParameterDefinitions []ParameterDefinition `json:"parameterDefinitions"`
 }
 
 type Cause struct {
@@ -28,6 +29,10 @@ type Cause struct {
 	UserId           string `json:"userId"`
 	UserName         string `json:"userName"`
 	UpstreamCause
+}
+
+type ParameterDefinition struct {
+	Name string `json:"name"`
 }
 
 type Task struct {

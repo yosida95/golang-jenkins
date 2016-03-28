@@ -36,9 +36,10 @@ type UpstreamCause struct {
 }
 
 type Job struct {
-	Name  string `json:"name"`
-	Url   string `json:"url"`
-	Color string `json:"color"`
+	Actions []Action `json:"actions"`
+	Name    string   `json:"name"`
+	Url     string   `json:"url"`
+	Color   string   `json:"color"`
 
 	Buildable    bool     `json:"buildable"`
 	DisplayName  string   `json:"displayName"`
