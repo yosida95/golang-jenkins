@@ -1,6 +1,9 @@
 package gojenkins
 
-import "encoding/xml"
+import (
+	"encoding/xml"
+	"log"
+)
 
 type Artifact struct {
 	DisplayPath  string `json:"displayPath"`
@@ -58,6 +61,12 @@ type Health struct {
 	Description string `json:"description"`
 }
 
+type JobItem struct {
+	XMLName struct{}             				`xml:"item"`
+	MavenJobItem 			*MavenJobItem    	`xml:"maven2-moduleset"`
+	PipelineJobItem 		*PipelineJobItem	`xml:"flow-definition"`
+}
+
 type MavenJobItem struct {
 	XMLName                          struct{}             `xml:"maven2-moduleset"`
 	Plugin                           string               `xml:"plugin,attr"`
@@ -90,6 +99,25 @@ type MavenJobItem struct {
 	GlobalSettings                   JobSettings          `xml:"globalSettings"`
 	RunPostStepsIfResult             RunPostStepsIfResult `xml:"runPostStepsIfResult"`
 	Postbuilders                     PostBuilders         `xml:"postbuilders"`
+}
+
+type PipelineJobItem struct {
+	XMLName                          struct{}             `xml:"flow-definition"`
+	/*
+	Plugin                           string               `xml:"plugin,attr"`
+	*/
+	Actions                          string               `xml:"actions"`
+	Description                      string               `xml:"description"`
+	KeepDependencies                 string               `xml:"keepDependencies"`
+	Properties                       JobProperties        `xml:"properties"`
+	Definition                       PipelineDefinition   `xml:"definition"`
+	Triggers                         Triggers             `xml:"triggers"`
+}
+
+type PipelineDefinition struct {
+	Scm                              Scm                  `xml:"scm"`
+	ScriptPath                       string               `xml:"scriptPath"`
+	Script                           string               `xml:"script"`
 }
 
 type Scm struct {
@@ -209,7 +237,7 @@ type LocalBranch struct {
 	LocalBranch string `xml:"localBranch"`
 }
 
-//UnmarshalXML implements xml.UnmarshalXML intrface
+//UnmarshalXML implements xml.UnmarshalXML interface
 //Decode between multiple types of Scm. for now only SVN is supported
 func (iscm *Scm) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 	for _, v := range start.Attr {
@@ -232,6 +260,8 @@ func (iscm *Scm) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 		if err != nil {
 			return err
 		}
+	default:
+		log.Printf("Unrecognised SCM class %s", iscm.Class)
 	}
 	return nil
 }

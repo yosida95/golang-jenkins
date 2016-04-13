@@ -63,6 +63,22 @@ func (jenkins *Jenkins) parseXmlResponse(resp *http.Response, body interface{}) 
 	return xml.Unmarshal(data, body)
 }
 
+func (jenkins *Jenkins) parseXmlResponseWithWrapperElement(resp *http.Response, body interface{}, rootElementName string) (err error) {
+	defer resp.Body.Close()
+
+	if body == nil {
+		return
+	}
+
+	data, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return
+	}
+
+	wrappedDoc := "<" + rootElementName + ">\n" + string(data) + "\n</" + rootElementName + ">"
+	return xml.Unmarshal([]byte(wrappedDoc), body)
+}
+
 func (jenkins *Jenkins) parseResponse(resp *http.Response, body interface{}) (err error) {
 	defer resp.Body.Close()
 
@@ -104,6 +120,21 @@ func (jenkins *Jenkins) getXml(path string, params url.Values, body interface{})
 		return
 	}
 	return jenkins.parseXmlResponse(resp, body)
+}
+
+func (jenkins *Jenkins) getConfigXml(path string, params url.Values, body interface{}) (err error) {
+	requestUrl := jenkins.buildUrl(path, params)
+	req, err := http.NewRequest("GET", requestUrl, nil)
+	if err != nil {
+		return
+	}
+
+	resp, err := jenkins.sendRequest(req)
+	if err != nil {
+		return
+	}
+	// lets add a dummy item wrapper xml to make the xml parsing easier
+	return jenkins.parseXmlResponseWithWrapperElement(resp, body, "item")
 }
 
 func (jenkins *Jenkins) post(path string, params url.Values, body interface{}) (err error) {
@@ -161,9 +192,14 @@ func (jenkins *Jenkins) GetJob(name string) (job Job, err error) {
 	return
 }
 
+// GetJobUrl returns the URL for the job with the specified name.
+func (jenkins *Jenkins) GetJobUrl(name string) string {
+	return fmt.Sprintf("/job/%s", name)
+}
+
 //GetJobConfig returns a maven job, has the one used to create Maven job
-func (jenkins *Jenkins) GetJobConfig(name string) (job MavenJobItem, err error) {
-	err = jenkins.getXml(fmt.Sprintf("/job/%s/config.xml", name), nil, &job)
+func (jenkins *Jenkins) GetJobConfig(name string) (job JobItem, err error) {
+	err = jenkins.getConfigXml(fmt.Sprintf("/job/%s/config.xml", name), nil, &job)
 	return
 }
 
@@ -180,7 +216,7 @@ func (jenkins *Jenkins) GetLastBuild(job Job) (build Build, err error) {
 }
 
 // Create a new job
-func (jenkins *Jenkins) CreateJob(mavenJobItem MavenJobItem, jobName string) error {
+func (jenkins *Jenkins) CreateJob(mavenJobItem JobItem, jobName string) error {
 	mavenJobItemXml, _ := xml.Marshal(mavenJobItem)
 	reader := bytes.NewReader(mavenJobItemXml)
 	params := url.Values{"name": []string{jobName}}
