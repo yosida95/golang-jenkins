@@ -216,9 +216,16 @@ func (jenkins *Jenkins) GetLastBuild(job Job) (build Build, err error) {
 }
 
 // Create a new job
-func (jenkins *Jenkins) CreateJob(mavenJobItem JobItem, jobName string) error {
-	mavenJobItemXml, _ := xml.Marshal(mavenJobItem)
-	reader := bytes.NewReader(mavenJobItemXml)
+func (jenkins *Jenkins) CreateJob(jobItem JobItem, jobName string) error {
+	jobItemXml := []byte{}
+	if jobItem.MavenJobItem != nil {
+		jobItemXml, _ = xml.Marshal(jobItem.MavenJobItem)
+	} else if jobItem.PipelineJobItem != nil {
+		jobItemXml, _ = xml.Marshal(jobItem.PipelineJobItem)
+	} else {
+		return fmt.Errorf("Unsupported JobItem type (%+v)", jobItem)
+	}
+	reader := bytes.NewReader(jobItemXml)
 	params := url.Values{"name": []string{jobName}}
 
 	return jenkins.postXml("/createItem", params, reader, nil)
