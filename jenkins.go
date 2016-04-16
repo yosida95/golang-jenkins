@@ -10,6 +10,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"strings"
 )
 
 type Auth struct {
@@ -75,7 +76,16 @@ func (jenkins *Jenkins) parseXmlResponseWithWrapperElement(resp *http.Response, 
 		return
 	}
 
-	wrappedDoc := "<" + rootElementName + ">\n" + string(data) + "\n</" + rootElementName + ">"
+	xmlText := strings.TrimSpace(string(data))
+	if strings.Index(xmlText, "<?") == 0 {
+		idx := strings.Index(xmlText, "?>")
+		if idx < 0 {
+			return fmt.Errorf("Could not find matching '?>' characters to strip the XML pragma!")
+		}
+		xmlText = xmlText[idx + 2:]
+	}
+	//log.Printf("Parsing XML: %s", xmlText)
+	wrappedDoc := "<" + rootElementName + ">\n" + xmlText + "\n</" + rootElementName + ">"
 	return xml.Unmarshal([]byte(wrappedDoc), body)
 }
 

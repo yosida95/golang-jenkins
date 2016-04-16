@@ -238,7 +238,7 @@ type LocalBranch struct {
 }
 
 //UnmarshalXML implements xml.UnmarshalXML interface
-//Decode between multiple types of Scm. for now only SVN is supported
+//Decode between multiple types of Scm
 func (iscm *Scm) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 	for _, v := range start.Attr {
 		if v.Name.Local == "class" {
@@ -265,3 +265,50 @@ func (iscm *Scm) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 	}
 	return nil
 }
+
+
+//MarshalXML implements xml.MarshalXML interface
+//Encodes the multiple types of Scm
+func (iscm *Scm) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
+	scmContent := iscm.ScmContent
+	switch s := scmContent.(type) {
+	case *ScmGit:
+		start.Attr = append(start.Attr, xml.Attr{
+			Name: xml.Name{
+				Local: "class",
+			},
+			Value: "hudson.plugins.git.GitSCM",
+		})
+		start.Attr = append(start.Attr, xml.Attr{
+			Name: xml.Name{
+				Local: "plugin",
+			},
+			Value: "git@2.4.0",
+		})
+		err := e.EncodeElement(s, start)
+		if err != nil {
+			return err
+		}
+	case *ScmSvn:
+		start.Attr = append(start.Attr, xml.Attr{
+			Name: xml.Name{
+				Local: "class",
+			},
+			Value: "hudson.scm.SubversionSCM",
+		})
+		start.Attr = append(start.Attr, xml.Attr{
+			Name: xml.Name{
+				Local: "plugin",
+			},
+			Value: "svn@2.4.0", // TODO whats the right SVN plugin text?
+		})
+		err := e.EncodeElement(s, start)
+		if err != nil {
+			return err
+		}
+	default:
+		log.Printf("Unrecognised SCM class (%+v)", s)
+	}
+	return nil
+}
+
