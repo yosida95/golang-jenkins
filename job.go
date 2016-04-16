@@ -3,6 +3,7 @@ package gojenkins
 import (
 	"encoding/xml"
 	"log"
+	"fmt"
 )
 
 type Artifact struct {
@@ -310,5 +311,15 @@ func (iscm *Scm) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 		log.Printf("Unrecognised SCM class (%+v)", s)
 	}
 	return nil
+}
+
+// JobToXml converts the given JobItem into XML
+func JobToXml(jobItem JobItem) ([]byte, error) {
+	if jobItem.MavenJobItem != nil {
+		return xml.Marshal(jobItem.MavenJobItem)
+	} else if jobItem.PipelineJobItem != nil {
+		return xml.Marshal(jobItem.PipelineJobItem)
+	}
+	return nil, fmt.Errorf("Unsupported JobItem type (%+v)", jobItem)
 }
 
