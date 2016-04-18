@@ -202,8 +202,8 @@ func (jenkins *Jenkins) GetJob(name string) (job Job, err error) {
 	return
 }
 
-// GetJobUrl returns the URL for the job with the specified name.
-func (jenkins *Jenkins) GetJobURL(name string) string {
+// GetJobUrl returns the URL path for the job with the specified name.
+func (jenkins *Jenkins) GetJobURLPath(name string) string {
 	return fmt.Sprintf("/job/%s", name)
 }
 
@@ -246,7 +246,7 @@ func (jenkins *Jenkins) UpdateJob(jobItem JobItem, jobName string) error {
 	reader := bytes.NewReader(jobItemXml)
 	params := url.Values{"name": []string{}}
 
-	return jenkins.postXml(jenkins.GetJobURL(jobName), params, reader, nil)
+	return jenkins.postXml(jenkins.GetJobURLPath(jobName), params, reader, nil)
 }
 
 // Add job to view
