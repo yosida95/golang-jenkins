@@ -249,6 +249,14 @@ func (jenkins *Jenkins) UpdateJob(jobItem JobItem, jobName string) error {
 	return jenkins.postXml(jenkins.GetJobURLPath(jobName), params, reader, nil)
 }
 
+// Remove a job
+func (jenkins *Jenkins) RemoveJob(jobName string) error {
+	reader := bytes.NewReader([]byte{})
+	params := url.Values{}
+	url := jenkins.GetJobURLPath(jobName) + "/doDelete"
+	return jenkins.postXml(url, params, reader, nil)
+}
+
 // Add job to view
 func (jenkins *Jenkins) AddJobToView(viewName string, job Job) error {
 	params := url.Values{"name": []string{job.Name}}
