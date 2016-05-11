@@ -30,6 +30,12 @@ type Build struct {
 	QueueId int `json:"queueId"`
 }
 
+// The summary of a build that is returned from the Job endpoint.
+type BuildShort struct {
+	Number int    `json:"number"`
+	Url    string `json:"url"`
+}
+
 type UpstreamCause struct {
 	ShortDescription string `json:"shortDescription"`
 	UpstreamBuild    int    `json:"upstreamBuild"`
@@ -43,10 +49,11 @@ type Job struct {
 	Url     string   `json:"url"`
 	Color   string   `json:"color"`
 
-	Buildable    bool     `json:"buildable"`
-	DisplayName  string   `json:"displayName"`
-	Description  string   `json:"description"`
-	HealthReport []Health `json:"healthReport"`
+	Buildable    bool         `json:"buildable"`
+	Builds       []BuildShort `json:"builds"`
+	DisplayName  string       `json:"displayName"`
+	Description  string       `json:"description"`
+	HealthReport []Health     `json:"healthReport"`
 
 	LastCompletedBuild    Build `json:"lastCompletedBuild"`
 	LastFailedBuild       Build `json:"lastFailedBuild"`
