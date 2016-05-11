@@ -26,6 +26,8 @@ type Build struct {
 
 	Artifacts []Artifact `json:"artifacts"`
 	Actions   []Action   `json:"actions"`
+
+	QueueId int `json:"queueId"`
 }
 
 type UpstreamCause struct {
