@@ -10,6 +10,8 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"strconv"
+	"strings"
 )
 
 type Auth struct {
@@ -106,20 +108,27 @@ func (jenkins *Jenkins) getXml(path string, params url.Values, body interface{})
 	return jenkins.parseXmlResponse(resp, body)
 }
 
-func (jenkins *Jenkins) post(path string, params url.Values, body interface{}) (err error) {
+func (jenkins *Jenkins) post(path string, params url.Values, body interface{}) error {
+	_, err := jenkins.postForResponse(path, params, body)
+	return err
+}
+
+// Same behaviour as post(), but the http response is returned.
+func (jenkins *Jenkins) postForResponse(path string, params url.Values, body interface{}) (resp *http.Response, err error) {
 	requestUrl := jenkins.buildUrl(path, params)
 	req, err := http.NewRequest("POST", requestUrl, nil)
 	if err != nil {
 		return
 	}
 
-	resp, err := jenkins.sendRequest(req)
+	resp, err = jenkins.sendRequest(req)
 	if err != nil {
 		return
 	}
 
-	return jenkins.parseResponse(resp, body)
+	return resp, jenkins.parseResponse(resp, body)
 }
+
 func (jenkins *Jenkins) postXml(path string, params url.Values, xmlBody io.Reader, body interface{}) (err error) {
 	requestUrl := jenkins.baseUrl + path
 	if params != nil {
@@ -205,12 +214,44 @@ func (jenkins *Jenkins) CreateView(listView ListView) error {
 
 // Create a new build for this job.
 // Params can be nil.
-func (jenkins *Jenkins) Build(job Job, params url.Values) error {
+//
+// If the build was successfully started, the first response value will be the
+// Queue ID of the new build - or -1 if it could not be read.
+func (jenkins *Jenkins) Build(job Job, params url.Values) (int, error) {
+	var path string
 	if hasParams(job) {
-		return jenkins.post(fmt.Sprintf("/job/%s/buildWithParameters", job.Name), params, nil)
+		path = fmt.Sprintf("/job/%s/buildWithParameters", job.Name)
 	} else {
-		return jenkins.post(fmt.Sprintf("/job/%s/build", job.Name), params, nil)
+		path = fmt.Sprintf("/job/%s/build", job.Name)
 	}
+
+	resp, err := jenkins.postForResponse(path, params, nil)
+	if err != nil {
+		return -1, err
+	} else if resp.StatusCode != http.StatusCreated {
+		return -1, nil
+	}
+
+	// Status is 201 CREATED - this means Jenkins has included a location
+	// header pointing to the new build's position in the queue.
+	//
+	// Parse out the queue ID and return it to the user.
+	location := resp.Header["Location"]
+	if len(location) == 0 {
+		return -1, fmt.Errorf("Could not parse location header: none set")
+	}
+
+	split := strings.Split(location[0], "/")
+	if len(split) < 2 {
+		return -1, fmt.Errorf("Could not parse location header: path not understood")
+	}
+
+	queue_item_id, err := strconv.Atoi(split[len(split)-2])
+	if err != nil {
+		return -1, fmt.Errorf("Could not parse location header: invalid integer")
+	}
+
+	return queue_item_id, nil
 }
 
 // Get the console output from a build.
