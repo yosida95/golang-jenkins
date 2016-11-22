@@ -82,7 +82,7 @@ func (jenkins *Jenkins) parseXmlResponseWithWrapperElement(resp *http.Response, 
 		if idx < 0 {
 			return fmt.Errorf("Could not find matching '?>' characters to strip the XML pragma!")
 		}
-		xmlText = xmlText[idx + 2:]
+		xmlText = xmlText[idx+2:]
 	}
 	//log.Printf("Parsing XML: %s", xmlText)
 	wrappedDoc := "<" + rootElementName + ">\n" + xmlText + "\n</" + rootElementName + ">"

@@ -2,8 +2,8 @@ package gojenkins
 
 import (
 	"encoding/xml"
-	"log"
 	"fmt"
+	"log"
 )
 
 type Artifact struct {
@@ -63,9 +63,9 @@ type Health struct {
 }
 
 type JobItem struct {
-	XMLName struct{}             				`xml:"item"`
-	MavenJobItem 			*MavenJobItem    	`xml:"maven2-moduleset"`
-	PipelineJobItem 		*PipelineJobItem	`xml:"flow-definition"`
+	XMLName         struct{}         `xml:"item"`
+	MavenJobItem    *MavenJobItem    `xml:"maven2-moduleset"`
+	PipelineJobItem *PipelineJobItem `xml:"flow-definition"`
 }
 
 type MavenJobItem struct {
@@ -103,22 +103,22 @@ type MavenJobItem struct {
 }
 
 type PipelineJobItem struct {
-	XMLName                          struct{}             `xml:"flow-definition"`
+	XMLName struct{} `xml:"flow-definition"`
 	/*
-	Plugin                           string               `xml:"plugin,attr"`
+		Plugin                           string               `xml:"plugin,attr"`
 	*/
-	Actions                          string               `xml:"actions"`
-	Description                      string               `xml:"description"`
-	KeepDependencies                 string               `xml:"keepDependencies"`
-	Properties                       JobProperties        `xml:"properties"`
-	Definition                       PipelineDefinition   `xml:"definition"`
-	Triggers                         Triggers             `xml:"triggers"`
+	Actions          string             `xml:"actions"`
+	Description      string             `xml:"description"`
+	KeepDependencies string             `xml:"keepDependencies"`
+	Properties       JobProperties      `xml:"properties"`
+	Definition       PipelineDefinition `xml:"definition"`
+	Triggers         Triggers           `xml:"triggers"`
 }
 
 type PipelineDefinition struct {
-	Scm                              Scm                  `xml:"scm"`
-	ScriptPath                       string               `xml:"scriptPath"`
-	Script                           string               `xml:"script"`
+	Scm        Scm    `xml:"scm"`
+	ScriptPath string `xml:"scriptPath"`
+	Script     string `xml:"script"`
 }
 
 type Scm struct {
@@ -267,7 +267,6 @@ func (iscm *Scm) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 	return nil
 }
 
-
 //MarshalXML implements xml.MarshalXML interface
 //Encodes the multiple types of Scm
 func (iscm *Scm) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
@@ -322,4 +321,3 @@ func JobToXml(jobItem JobItem) ([]byte, error) {
 	}
 	return nil, fmt.Errorf("Unsupported JobItem type (%+v)", jobItem)
 }
-
