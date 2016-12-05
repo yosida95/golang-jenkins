@@ -73,7 +73,7 @@ func TestCreateJobItem(t *testing.T) {
 				},
 			},
 			IgnoreDirPropChanges: "false",
-			FilterChanglog:       "false",
+			FilterChangelog:      "false",
 			WorkspaceUpdater:     WorkspaceUpdater{Class: "hudson.scm.subversion.UpdateUpdater"},
 		},
 		Class:  "hudson.scm.SubversionSCM",

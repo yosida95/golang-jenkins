@@ -109,7 +109,7 @@ type ScmSvn struct {
 	ExcludedCommitMessages string           `xml:"excludedCommitMessages"`
 	WorkspaceUpdater       WorkspaceUpdater `xml:"workspaceUpdater"`
 	IgnoreDirPropChanges   string           `xml:"ignoreDirPropChanges"`
-	FilterChanglog         string           `xml:"filterChangelog"`
+	FilterChangelog        string           `xml:"filterChangelog"`
 }
 
 type WorkspaceUpdater struct {
