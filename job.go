@@ -8,6 +8,33 @@ type Artifact struct {
 	RelativePath string `json:"relativePath"`
 }
 
+type ScmAuthor struct {
+	FullName    string `json:"fullName"`
+	AbsoluteUrl string `json:"absoluteUrl"`
+}
+
+type ScmChangeSetPath struct {
+	EditType string `json:"editType"`
+	File     string `json:"File"`
+}
+
+type ChangeSetItem struct {
+	AffectedPaths []string           `json:"affectedPaths"`
+	CommitId      string             `json:"commitId"`
+	Timestamp     int                `json:"timestamp"`
+	Author        ScmAuthor          `json:"author"`
+	Comment       string             `json:"comment"`
+	Date          string             `json:"date"`
+	Id            string             `json:"id"`
+	Message       string             `json:"msg"`
+	Paths         []ScmChangeSetPath `json:"paths"`
+}
+
+type ScmChangeSet struct {
+	Kind  string          `json:"kind"`
+	Items []ChangeSetItem `json:"items"`
+}
+
 type Build struct {
 	Id     string `json:"id"`
 	Number int    `json:"number"`
@@ -26,6 +53,8 @@ type Build struct {
 
 	Artifacts []Artifact `json:"artifacts"`
 	Actions   []Action   `json:"actions"`
+
+	ChangeSet ScmChangeSet `json:"changeSet"`
 }
 
 type UpstreamCause struct {
