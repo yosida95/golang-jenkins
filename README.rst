@@ -35,4 +35,4 @@ Make calls against the desired resources:
 License
 -------
 golang-jenkins is licensed under the MIT LICENSE.
-See `./LICENSE.rst <./LICENSE.rst>`_.
+See `./LICENSE <./LICENSE>`_.
