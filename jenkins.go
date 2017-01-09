@@ -117,6 +117,9 @@ func (jenkins *Jenkins) post(path string, params url.Values, body interface{}) (
 	if err != nil {
 		return
 	}
+	if !(200 <= resp.StatusCode && resp.StatusCode <= 299) {
+		return errors.New(fmt.Sprintf("error: HTTP POST returned status code %d (expected 2xx)", resp.StatusCode))
+	}
 
 	return jenkins.parseResponse(resp, body)
 }
@@ -186,6 +189,11 @@ func (jenkins *Jenkins) CreateJob(mavenJobItem MavenJobItem, jobName string) err
 	params := url.Values{"name": []string{jobName}}
 
 	return jenkins.postXml("/createItem", params, reader, nil)
+}
+
+// Delete a job
+func (jenkins *Jenkins) DeleteJob(job Job) error {
+	return jenkins.post(fmt.Sprintf("/job/%s/doDelete", job.Name), nil, nil)
 }
 
 // Add job to view
