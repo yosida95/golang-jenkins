@@ -30,14 +30,16 @@ func TestAddJobToView(t *testing.T) {
 	scm := Scm{
 		Class: "hudson.scm.SubversionSCM",
 	}
-	jobItem := MavenJobItem{
-		Plugin:               "maven-plugin@2.7.1",
-		Description:          "test description",
-		Scm:                  scm,
-		Triggers:             Triggers{},
-		RunPostStepsIfResult: RunPostStepsIfResult{},
-		Settings:             JobSettings{Class: "jenkins.mvn.DefaultSettingsProvider"},
-		GlobalSettings:       JobSettings{Class: "jenkins.mvn.DefaultSettingsProvider"},
+	jobItem := JobItem{
+		MavenJobItem: &MavenJobItem{
+			Plugin:               "maven-plugin@2.7.1",
+			Description:          "test description",
+			Scm:                  scm,
+			Triggers:             Triggers{},
+			RunPostStepsIfResult: RunPostStepsIfResult{},
+			Settings:             JobSettings{Class: "jenkins.mvn.DefaultSettingsProvider"},
+			GlobalSettings:       JobSettings{Class: "jenkins.mvn.DefaultSettingsProvider"},
+		},
 	}
 	newJobName := fmt.Sprintf("test-with-view-%d", time.Now().UnixNano())
 	newViewName := fmt.Sprintf("test-view-%d", time.Now().UnixNano())
@@ -83,14 +85,16 @@ func TestCreateJobItem(t *testing.T) {
 	postStep := RunPostStepsIfResult{Name: "FAILURE", Ordinal: "2", Color: "RED", CompleteBuild: "true"}
 	settings := JobSettings{Class: "jenkins.mvn.DefaultSettingsProvider"}
 	globalSettings := JobSettings{Class: "jenkins.mvn.DefaultSettingsProvider"}
-	jobItem := MavenJobItem{
-		Plugin:               "maven-plugin@2.7.1",
-		Description:          "test description",
-		Scm:                  scm,
-		Triggers:             triggers,
-		RunPostStepsIfResult: postStep,
-		Settings:             settings,
-		GlobalSettings:       globalSettings,
+	jobItem := JobItem{
+		MavenJobItem: &MavenJobItem{
+			Plugin:               "maven-plugin@2.7.1",
+			Description:          "test description",
+			Scm:                  scm,
+			Triggers:             triggers,
+			RunPostStepsIfResult: postStep,
+			Settings:             settings,
+			GlobalSettings:       globalSettings,
+		},
 	}
 
 	newJobName := fmt.Sprintf("test-%d", time.Now().UnixNano())

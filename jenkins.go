@@ -10,6 +10,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"strings"
 )
 
 type Auth struct {
@@ -63,6 +64,31 @@ func (jenkins *Jenkins) parseXmlResponse(resp *http.Response, body interface{}) 
 	return xml.Unmarshal(data, body)
 }
 
+func (jenkins *Jenkins) parseXmlResponseWithWrapperElement(resp *http.Response, body interface{}, rootElementName string) (err error) {
+	defer resp.Body.Close()
+
+	if body == nil {
+		return
+	}
+
+	data, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return
+	}
+
+	xmlText := strings.TrimSpace(string(data))
+	if strings.Index(xmlText, "<?") == 0 {
+		idx := strings.Index(xmlText, "?>")
+		if idx < 0 {
+			return fmt.Errorf("Could not find matching '?>' characters to strip the XML pragma!")
+		}
+		xmlText = xmlText[idx+2:]
+	}
+	//log.Printf("Parsing XML: %s", xmlText)
+	wrappedDoc := "<" + rootElementName + ">\n" + xmlText + "\n</" + rootElementName + ">"
+	return xml.Unmarshal([]byte(wrappedDoc), body)
+}
+
 func (jenkins *Jenkins) parseResponse(resp *http.Response, body interface{}) (err error) {
 	defer resp.Body.Close()
 
@@ -104,6 +130,21 @@ func (jenkins *Jenkins) getXml(path string, params url.Values, body interface{})
 		return
 	}
 	return jenkins.parseXmlResponse(resp, body)
+}
+
+func (jenkins *Jenkins) getConfigXml(path string, params url.Values, body interface{}) (err error) {
+	requestUrl := jenkins.buildUrl(path, params)
+	req, err := http.NewRequest("GET", requestUrl, nil)
+	if err != nil {
+		return
+	}
+
+	resp, err := jenkins.sendRequest(req)
+	if err != nil {
+		return
+	}
+	// lets add a dummy item wrapper xml to make the xml parsing easier
+	return jenkins.parseXmlResponseWithWrapperElement(resp, body, "item")
 }
 
 func (jenkins *Jenkins) post(path string, params url.Values, body interface{}) (err error) {
@@ -161,9 +202,14 @@ func (jenkins *Jenkins) GetJob(name string) (job Job, err error) {
 	return
 }
 
+// GetJobUrl returns the URL path for the job with the specified name.
+func (jenkins *Jenkins) GetJobURLPath(name string) string {
+	return fmt.Sprintf("/job/%s", name)
+}
+
 //GetJobConfig returns a maven job, has the one used to create Maven job
-func (jenkins *Jenkins) GetJobConfig(name string) (job MavenJobItem, err error) {
-	err = jenkins.getXml(fmt.Sprintf("/job/%s/config.xml", name), nil, &job)
+func (jenkins *Jenkins) GetJobConfig(name string) (job JobItem, err error) {
+	err = jenkins.getConfigXml(fmt.Sprintf("/job/%s/config.xml", name), nil, &job)
 	return
 }
 
@@ -180,12 +226,35 @@ func (jenkins *Jenkins) GetLastBuild(job Job) (build Build, err error) {
 }
 
 // Create a new job
-func (jenkins *Jenkins) CreateJob(mavenJobItem MavenJobItem, jobName string) error {
-	mavenJobItemXml, _ := xml.Marshal(mavenJobItem)
-	reader := bytes.NewReader(mavenJobItemXml)
+func (jenkins *Jenkins) CreateJob(jobItem JobItem, jobName string) error {
+	jobItemXml, err := JobToXml(jobItem)
+	if err != nil {
+		return err
+	}
+	reader := bytes.NewReader(jobItemXml)
 	params := url.Values{"name": []string{jobName}}
 
 	return jenkins.postXml("/createItem", params, reader, nil)
+}
+
+// Update a job
+func (jenkins *Jenkins) UpdateJob(jobItem JobItem, jobName string) error {
+	jobItemXml, err := JobToXml(jobItem)
+	if err != nil {
+		return err
+	}
+	reader := bytes.NewReader(jobItemXml)
+	params := url.Values{"name": []string{}}
+
+	return jenkins.postXml(jenkins.GetJobURLPath(jobName), params, reader, nil)
+}
+
+// Remove a job
+func (jenkins *Jenkins) RemoveJob(jobName string) error {
+	reader := bytes.NewReader([]byte{})
+	params := url.Values{}
+	url := jenkins.GetJobURLPath(jobName) + "/doDelete"
+	return jenkins.postXml(url, params, reader, nil)
 }
 
 // Add job to view

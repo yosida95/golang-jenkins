@@ -1,6 +1,10 @@
 package gojenkins
 
-import "encoding/xml"
+import (
+	"encoding/xml"
+	"fmt"
+	"log"
+)
 
 type Artifact struct {
 	DisplayPath  string `json:"displayPath"`
@@ -58,6 +62,12 @@ type Health struct {
 	Description string `json:"description"`
 }
 
+type JobItem struct {
+	XMLName         struct{}         `xml:"item"`
+	MavenJobItem    *MavenJobItem    `xml:"maven2-moduleset"`
+	PipelineJobItem *PipelineJobItem `xml:"flow-definition"`
+}
+
 type MavenJobItem struct {
 	XMLName                          struct{}             `xml:"maven2-moduleset"`
 	Plugin                           string               `xml:"plugin,attr"`
@@ -90,6 +100,25 @@ type MavenJobItem struct {
 	GlobalSettings                   JobSettings          `xml:"globalSettings"`
 	RunPostStepsIfResult             RunPostStepsIfResult `xml:"runPostStepsIfResult"`
 	Postbuilders                     PostBuilders         `xml:"postbuilders"`
+}
+
+type PipelineJobItem struct {
+	XMLName struct{} `xml:"flow-definition"`
+	/*
+		Plugin                           string               `xml:"plugin,attr"`
+	*/
+	Actions          string             `xml:"actions"`
+	Description      string             `xml:"description"`
+	KeepDependencies string             `xml:"keepDependencies"`
+	Properties       JobProperties      `xml:"properties"`
+	Definition       PipelineDefinition `xml:"definition"`
+	Triggers         Triggers           `xml:"triggers"`
+}
+
+type PipelineDefinition struct {
+	Scm        Scm    `xml:"scm"`
+	ScriptPath string `xml:"scriptPath"`
+	Script     string `xml:"script"`
 }
 
 type Scm struct {
@@ -209,8 +238,8 @@ type LocalBranch struct {
 	LocalBranch string `xml:"localBranch"`
 }
 
-//UnmarshalXML implements xml.UnmarshalXML intrface
-//Decode between multiple types of Scm. for now only SVN is supported
+//UnmarshalXML implements xml.UnmarshalXML interface
+//Decode between multiple types of Scm
 func (iscm *Scm) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 	for _, v := range start.Attr {
 		if v.Name.Local == "class" {
@@ -232,6 +261,63 @@ func (iscm *Scm) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 		if err != nil {
 			return err
 		}
+	default:
+		log.Printf("Unrecognised SCM class %s", iscm.Class)
 	}
 	return nil
+}
+
+//MarshalXML implements xml.MarshalXML interface
+//Encodes the multiple types of Scm
+func (iscm *Scm) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
+	scmContent := iscm.ScmContent
+	switch s := scmContent.(type) {
+	case *ScmGit:
+		start.Attr = append(start.Attr, xml.Attr{
+			Name: xml.Name{
+				Local: "class",
+			},
+			Value: "hudson.plugins.git.GitSCM",
+		})
+		start.Attr = append(start.Attr, xml.Attr{
+			Name: xml.Name{
+				Local: "plugin",
+			},
+			Value: "git@2.4.0",
+		})
+		err := e.EncodeElement(s, start)
+		if err != nil {
+			return err
+		}
+	case *ScmSvn:
+		start.Attr = append(start.Attr, xml.Attr{
+			Name: xml.Name{
+				Local: "class",
+			},
+			Value: "hudson.scm.SubversionSCM",
+		})
+		start.Attr = append(start.Attr, xml.Attr{
+			Name: xml.Name{
+				Local: "plugin",
+			},
+			Value: "svn@2.4.0", // TODO whats the right SVN plugin text?
+		})
+		err := e.EncodeElement(s, start)
+		if err != nil {
+			return err
+		}
+	default:
+		log.Printf("Unrecognised SCM class (%+v)", s)
+	}
+	return nil
+}
+
+// JobToXml converts the given JobItem into XML
+func JobToXml(jobItem JobItem) ([]byte, error) {
+	if jobItem.MavenJobItem != nil {
+		return xml.Marshal(jobItem.MavenJobItem)
+	} else if jobItem.PipelineJobItem != nil {
+		return xml.Marshal(jobItem.PipelineJobItem)
+	}
+	return nil, fmt.Errorf("Unsupported JobItem type (%+v)", jobItem)
 }
