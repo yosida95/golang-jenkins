@@ -31,8 +31,8 @@ func NewJenkins(auth *Auth, baseUrl string) *Jenkins {
 	}
 }
 
-// EnhanceClient with timeouts or insecure transport, etc.
-func (jenkins *Jenkins) EnhanceClient(client *http.Client) {
+// SetHTTPClient with timeouts or insecure transport, etc.
+func (jenkins *Jenkins) SetHTTPClient(client *http.Client) {
 	jenkins.client = client
 }
 
