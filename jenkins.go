@@ -17,6 +17,11 @@ type Auth struct {
 	ApiToken string
 }
 
+type CrumbIssuer struct {
+	Crumb             string `json:"crumb"`
+	CrumbRequestField string `json:"crumbRequestField"`
+}
+
 type Jenkins struct {
 	auth    *Auth
 	baseUrl string
@@ -46,6 +51,14 @@ func (jenkins *Jenkins) buildUrl(path string, params url.Values) (requestUrl str
 	}
 
 	return
+}
+
+// getCrumb returns a csrf crumb for post.
+func (jenkins *Jenkins) getCrumb() (CrumbIssuer, error) {
+	payload := CrumbIssuer{}
+	err := jenkins.get("/crumbIssuer", nil, &payload)
+
+	return payload, err
 }
 
 func (jenkins *Jenkins) sendRequest(req *http.Request) (*http.Response, error) {
@@ -114,6 +127,11 @@ func (jenkins *Jenkins) getXml(path string, params url.Values, body interface{})
 }
 
 func (jenkins *Jenkins) post(path string, params url.Values, body interface{}) (err error) {
+
+	// add a CSRF crumb
+	crumb, _ := jenkins.getCrumb()
+	params.Add(crumb.CrumbRequestField, crumb.Crumb);
+
 	requestUrl := jenkins.buildUrl(path, params)
 	req, err := http.NewRequest("POST", requestUrl, nil)
 	if err != nil {
