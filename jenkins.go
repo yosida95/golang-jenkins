@@ -20,13 +20,20 @@ type Auth struct {
 type Jenkins struct {
 	auth    *Auth
 	baseUrl string
+	client  *http.Client
 }
 
 func NewJenkins(auth *Auth, baseUrl string) *Jenkins {
 	return &Jenkins{
 		auth:    auth,
 		baseUrl: baseUrl,
+		client:  http.DefaultClient,
 	}
+}
+
+// SetHTTPClient with timeouts or insecure transport, etc.
+func (jenkins *Jenkins) SetHTTPClient(client *http.Client) {
+	jenkins.client = client
 }
 
 func (jenkins *Jenkins) buildUrl(path string, params url.Values) (requestUrl string) {
@@ -45,7 +52,7 @@ func (jenkins *Jenkins) sendRequest(req *http.Request) (*http.Response, error) {
 	if jenkins.auth != nil {
 		req.SetBasicAuth(jenkins.auth.Username, jenkins.auth.ApiToken)
 	}
-	return http.DefaultClient.Do(req)
+	return jenkins.client.Do(req)
 }
 
 func (jenkins *Jenkins) parseXmlResponse(resp *http.Response, body interface{}) (err error) {
