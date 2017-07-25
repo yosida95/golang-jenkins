@@ -10,6 +10,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"strings"
 )
 
 type Auth struct {
@@ -114,10 +115,20 @@ func (jenkins *Jenkins) getXml(path string, params url.Values, body interface{})
 }
 
 func (jenkins *Jenkins) post(path string, params url.Values, body interface{}) (err error) {
-	requestUrl := jenkins.buildUrl(path, params)
-	req, err := http.NewRequest("POST", requestUrl, nil)
+	requestUrl := jenkins.buildUrl(path, nil)
+
+	var bodyReader io.Reader
+	if params != nil {
+		bodyReader = strings.NewReader(params.Encode())
+	}
+
+	req, err := http.NewRequest("POST", requestUrl, bodyReader)
 	if err != nil {
 		return
+	}
+
+	if params != nil {
+		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	}
 
 	resp, err := jenkins.sendRequest(req)
