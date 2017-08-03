@@ -170,8 +170,8 @@ func (jenkins *Jenkins) GetJobs() ([]Job, error) {
 }
 
 // GetJob returns a job which has specified name.
-func (jenkins *Jenkins) GetJob(name string) (job Job, err error) {
-	err = jenkins.get(fmt.Sprintf("/job/%s", name), nil, &job)
+func (jenkins *Jenkins) GetJob(name string, params url.Values) (job Job, err error) {
+	err = jenkins.get(fmt.Sprintf("/job/%s", name), params, &job)
 	return
 }
 

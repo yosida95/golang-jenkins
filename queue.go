@@ -22,6 +22,7 @@ type Item struct {
 type Action struct {
 	Causes               []Cause               `json:"causes"`
 	ParameterDefinitions []ParameterDefinition `json:"parameterDefinitions"`
+	Parameters           []Parameter           `json:"parameter"`
 }
 
 type Cause struct {
@@ -33,6 +34,11 @@ type Cause struct {
 
 type ParameterDefinition struct {
 	Name string `json:"name"`
+}
+
+type Parameter struct {
+	Name  string `json:"name"`
+	Value string `json:"value"`
 }
 
 type Task struct {
