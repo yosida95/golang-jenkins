@@ -22,7 +22,7 @@ type Item struct {
 type Action struct {
 	Causes               []Cause               `json:"causes"`
 	ParameterDefinitions []ParameterDefinition `json:"parameterDefinitions"`
-	Parameters           []Parameter           `json:"parameter"`
+	Parameters           []Parameter           `json:"parameters"`
 }
 
 type Cause struct {
