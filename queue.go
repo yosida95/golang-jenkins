@@ -37,8 +37,8 @@ type ParameterDefinition struct {
 }
 
 type Parameter struct {
-	Name  string `json:"name"`
-	Value string `json:"value"`
+	Name  string      `json:"name"`
+	Value interface{} `json:"value"`
 }
 
 type Task struct {
