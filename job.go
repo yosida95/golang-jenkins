@@ -81,10 +81,24 @@ type Job struct {
 	LastSuccessfulBuild   Build `json:"lastSuccessfulBuild"`
 	LastUnstableBuild     Build `json:"lastUnstableBuild"`
 	LastUnsuccessfulBuild Build `json:"lastUnsuccessfulBuild"`
+
+	Property []Property `json:"property"`
 }
 
 type Health struct {
 	Description string `json:"description"`
+}
+
+type Property struct {
+	Parameters []JobParameter `json:"parameterDefinitions"`
+}
+
+type JobParameter struct {
+	Default     Parameter `json:"defaultParameterValue"`
+	Name        string    `json:"name"`
+	Description string    `json:"description"`
+	Type        string    `json:"type"`
+	Choices     []string  `json:"choices"`
 }
 
 type MavenJobItem struct {
