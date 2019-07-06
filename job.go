@@ -71,6 +71,7 @@ type Job struct {
 	Color   string   `json:"color"`
 
 	Buildable    bool     `json:"buildable"`
+	InQueue      bool     `json:"inQueue"`
 	Builds       []Build  `json:"builds"`
 	DisplayName  string   `json:"displayName"`
 	Description  string   `json:"description"`
