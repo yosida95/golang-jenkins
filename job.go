@@ -23,6 +23,7 @@ type ChangeSetItem struct {
 	CommitId      string             `json:"commitId"`
 	Timestamp     int                `json:"timestamp"`
 	Author        ScmAuthor          `json:"author"`
+	AuthorEmail   string             `json:"authorEmail"`
 	Comment       string             `json:"comment"`
 	Date          string             `json:"date"`
 	Id            string             `json:"id"`
