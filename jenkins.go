@@ -10,6 +10,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"strings"
 )
 
 type Auth struct {
@@ -37,7 +38,10 @@ func (jenkins *Jenkins) SetHTTPClient(client *http.Client) {
 }
 
 func (jenkins *Jenkins) buildUrl(path string, params url.Values) (requestUrl string) {
-	requestUrl = jenkins.baseUrl + path + "/api/json"
+	if !strings.HasPrefix(path, jenkins.baseUrl) {
+		path = jenkins.baseUrl + path
+	}
+	requestUrl = path + "/api/json"
 	if params != nil {
 		queryString := params.Encode()
 		if queryString != "" {
@@ -221,14 +225,14 @@ func (jenkins *Jenkins) GetJobConfig(name string) (job MavenJobItem, err error) 
 }
 
 // GetBuild returns a number-th build result of specified job.
-func (jenkins *Jenkins) GetBuild(jobName string, number int) (build Build, err error) {
-	err = jenkins.get(fmt.Sprintf("/job/%s/%d", jobName, number), nil, &build)
+func (jenkins *Jenkins) GetBuild(job Job, number int) (build Build, err error) {
+	err = jenkins.get(fmt.Sprintf("%s/%d", job.Url, number), nil, &build)
 	return
 }
 
 // GetLastBuild returns the last build of specified job.
-func (jenkins *Jenkins) GetLastBuild(jobName string) (build Build, err error) {
-	err = jenkins.get(fmt.Sprintf("/job/%s/lastBuild", jobName), nil, &build)
+func (jenkins *Jenkins) GetLastBuild(job Job) (build Build, err error) {
+	err = jenkins.get(fmt.Sprintf("%s/lastBuild", job.Url), nil, &build)
 	return
 }
 
@@ -263,11 +267,11 @@ func (jenkins *Jenkins) CreateView(listView ListView) error {
 
 // Create a new build for this job.
 // Params can be nil.
-func (jenkins *Jenkins) Build(jobName string, params url.Values) error {
+func (jenkins *Jenkins) Build(job Job, params url.Values) error {
 	if hasParams(job) {
-		return jenkins.post(fmt.Sprintf("/job/%s/buildWithParameters", jobName), params, nil)
+		return jenkins.post(fmt.Sprintf("%s/buildWithParameters", job.Url), params, nil)
 	} else {
-		return jenkins.post(fmt.Sprintf("/job/%s/build", jobName), params, nil)
+		return jenkins.post(fmt.Sprintf("%s/build", job.Url), params, nil)
 	}
 }
 
