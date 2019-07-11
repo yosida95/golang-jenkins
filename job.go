@@ -55,7 +55,8 @@ type Build struct {
 	Artifacts []Artifact `json:"artifacts"`
 	Actions   []Action   `json:"actions"`
 
-	ChangeSet ScmChangeSet `json:"changeSet"`
+	ChangeSet ScmChangeSet `json:"changeSet"` // regular build
+	ChangeSets []ScmChangeSet `json:"changeSets"` // pipeline
 }
 
 type UpstreamCause struct {
