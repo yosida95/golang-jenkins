@@ -230,9 +230,21 @@ func (jenkins *Jenkins) GetBuild(job Job, number int) (build Build, err error) {
 	return
 }
 
+// GetBuildByJobName returns a number-th build result of specified job.
+func (jenkins *Jenkins) GetBuildByJobId(jobId string, number int) (build Build, err error) {
+	err = jenkins.get(fmt.Sprintf("/job/%s/%d", jobId, number), nil, &build)
+	return
+}
+
 // GetLastBuild returns the last build of specified job.
 func (jenkins *Jenkins) GetLastBuild(job Job) (build Build, err error) {
 	err = jenkins.get(fmt.Sprintf("%s/lastBuild", job.Url), nil, &build)
+	return
+}
+
+// GetLastBuild returns the last build of specified job.
+func (jenkins *Jenkins) GetLastBuildByJobId(jobId string) (build Build, err error) {
+	err = jenkins.get(fmt.Sprintf("/job/%s/lastBuild", jobId), nil, &build)
 	return
 }
 
