@@ -55,7 +55,7 @@ type Build struct {
 	Artifacts []Artifact `json:"artifacts"`
 	Actions   []Action   `json:"actions"`
 
-	ChangeSet ScmChangeSet `json:"changeSet"` // regular build
+	ChangeSet  ScmChangeSet   `json:"changeSet"`  // regular build
 	ChangeSets []ScmChangeSet `json:"changeSets"` // pipeline
 }
 
@@ -64,6 +64,17 @@ type UpstreamCause struct {
 	UpstreamBuild    int    `json:"upstreamBuild"`
 	UpstreamProject  string `json:"upstreamProject"`
 	UpstreamUrl      string `json:"upstreamUrl"`
+}
+
+type QueueItem struct {
+	Id           int    `json:"id"`
+	Blocked      bool   `json:"blocked"`
+	Buildable    bool   `json:"buildable"`
+	InQueueSince int    `json:"inQueueSince"`
+	Params       string `json:"params"`
+	Stuck        bool   `json:"stuck"`
+	Url          string `json:"url"`
+	Why          string `json:"why"`
 }
 
 type Job struct {
@@ -85,6 +96,8 @@ type Job struct {
 	LastSuccessfulBuild   Build `json:"lastSuccessfulBuild"`
 	LastUnstableBuild     Build `json:"lastUnstableBuild"`
 	LastUnsuccessfulBuild Build `json:"lastUnsuccessfulBuild"`
+
+	QueueItem QueueItem `json:"queueItem"`
 
 	Property []Property `json:"property"`
 }
