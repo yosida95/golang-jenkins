@@ -1,7 +1,6 @@
 package gojenkins
 
 import (
-	"fmt"
 	"net/url"
 	"strings"
 )
