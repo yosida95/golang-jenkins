@@ -3,7 +3,6 @@ package gojenkins
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -26,8 +25,8 @@ type UsernamePasswordCredential struct {
 	Description string `json:"description"`
 	Class       string `json:"$class"`
 }
-
-func (jenkins *Jenkins) CreateCredentialsSecret(scope, id, description, secret string) {
+//CreateCredentialsSecret creates secret text credentials 
+func (jenkins *Jenkins) CreateCredentialsSecret(scope, id, description, secret string) error {
 	header := map[string]string{"Content-Type": "application/x-www-form-urlencoded"}
 
 	m := SecretCreds{
@@ -41,10 +40,10 @@ func (jenkins *Jenkins) CreateCredentialsSecret(scope, id, description, secret s
 	b := new(bytes.Buffer)
 	json.NewEncoder(b).Encode(m)
 	jsonPayload := `{"": "0", "credentials":` + b.String() + `}`
-	jenkins.createCredentials(header, jsonPayload)
+	return jenkins.createCredentials(header, jsonPayload)
 }
 
-func (jenkins *Jenkins) postForm(path string, additionalHeader map[string]string, params url.Values, data url.Values, body interface{}) (err error) {
+func (jenkins *Jenkins) postForm(path string, additionalHeader map[string]string, params url.Values, data url.Values, body interface{}) error {
 	requestURL := jenkins.baseUrl + path
 	if params != nil {
 		queryString := params.Encode()
@@ -64,16 +63,16 @@ func (jenkins *Jenkins) postForm(path string, additionalHeader map[string]string
 
 	resp, err := jenkins.sendRequest(req)
 	if err != nil {
-		return
+		return err
 	}
-	if !(200 <= resp.StatusCode && resp.StatusCode <= 299) {
-		return errors.New(fmt.Sprintf("error: HTTP POST returned status code %d (expected 2xx)", resp.StatusCode))
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("error: HTTP POST returned status code %d (expected 200)", resp.StatusCode)
 	}
 
 	return jenkins.parseResponse(resp, body)
 }
-
-func (jenkins *Jenkins) CreateUsernamePasswordCredential(scope, id, user, description, password string) {
+//CreateUsernamePasswordCredential creates the username password credentials
+func (jenkins *Jenkins) CreateUsernamePasswordCredential(scope, id, user, description, password string) error {
 	header := map[string]string{"Content-Type": "application/x-www-form-urlencoded"}
 
 	m := UsernamePasswordCredential{
@@ -88,17 +87,11 @@ func (jenkins *Jenkins) CreateUsernamePasswordCredential(scope, id, user, descri
 	b := new(bytes.Buffer)
 	json.NewEncoder(b).Encode(m)
 	jsonPayload := `{"": "0", "credentials":` + b.String() + `}`
-	jenkins.createCredentials(header, jsonPayload)
+	return jenkins.createCredentials(header, jsonPayload)
 }
 
-func (jenkins *Jenkins) createCredentials(header map[string]string, jsonPayload string) {
+func (jenkins *Jenkins) createCredentials(header map[string]string, jsonPayload string) error {
 	form := url.Values{"json": []string{jsonPayload}}
-
 	var body interface{}
-	err := jenkins.postForm("/credentials/store/system/domain/_/createCredentials", header, url.Values{}, form, body)
-	if err != nil {
-		fmt.Println("Error: " + err.Error())
-	} else {
-		fmt.Println(body)
-	}
+	return jenkins.postForm("/credentials/store/system/domain/_/createCredentials", header, url.Values{}, form, body)
 }
