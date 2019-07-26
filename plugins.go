@@ -14,10 +14,5 @@ func (jenkins *Jenkins) InstallPlugin(name, version string) error {
 	xmlBody := strings.NewReader(payload)
 
 	var body interface{}
-	err := jenkins.postXml("/pluginManager/installNecessaryPlugins", url.Values{}, xmlBody, &body)
-	if err != nil {
-		return err
-	}
-	fmt.Println(body)
-	return nil
+	return jenkins.postXml("/pluginManager/installNecessaryPlugins", url.Values{}, xmlBody, &body)
 }
