@@ -21,7 +21,7 @@ type ScmChangeSetPath struct {
 type ChangeSetItem struct {
 	AffectedPaths []string           `json:"affectedPaths"`
 	CommitId      string             `json:"commitId"`
-	Timestamp     int                `json:"timestamp"`
+	Timestamp     int64              `json:"timestamp"`
 	Author        ScmAuthor          `json:"author"`
 	AuthorEmail   string             `json:"authorEmail"`
 	Comment       string             `json:"comment"`
@@ -44,9 +44,9 @@ type Build struct {
 	FullDisplayName string `json:"fullDisplayName"`
 	Description     string `json:"description"`
 
-	Timestamp         int `json:"timestamp"`
-	Duration          int `json:"duration"`
-	EstimatedDuration int `json:"estimatedDuration"`
+	Timestamp         int64 `json:"timestamp"`
+	Duration          int64 `json:"duration"`
+	EstimatedDuration int64 `json:"estimatedDuration"`
 
 	Building bool   `json:"building"`
 	KeepLog  bool   `json:"keepLog"`
@@ -70,7 +70,7 @@ type QueueItem struct {
 	Id           int    `json:"id"`
 	Blocked      bool   `json:"blocked"`
 	Buildable    bool   `json:"buildable"`
-	InQueueSince int    `json:"inQueueSince"`
+	InQueueSince int64  `json:"inQueueSince"`
 	Params       string `json:"params"`
 	Stuck        bool   `json:"stuck"`
 	Url          string `json:"url"`
