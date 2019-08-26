@@ -1,6 +1,8 @@
 package gojenkins
 
-import "encoding/xml"
+import (
+	"encoding/xml"
+)
 
 type Artifact struct {
 	DisplayPath  string `json:"displayPath"`
@@ -83,6 +85,8 @@ type Job struct {
 	Url     string   `json:"url"`
 	Color   string   `json:"color"`
 
+	Jobs []SubJobDescription `json:"jobs"`
+
 	Buildable    bool     `json:"buildable"`
 	InQueue      bool     `json:"inQueue"`
 	Builds       []Build  `json:"builds"`
@@ -100,6 +104,12 @@ type Job struct {
 	QueueItem QueueItem `json:"queueItem"`
 
 	Property []Property `json:"property"`
+}
+
+type SubJobDescription struct {
+	Name  string `json:"name"`
+	Url   string `json:"url"`
+	Color string `json:"color"`
 }
 
 type Health struct {
