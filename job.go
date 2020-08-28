@@ -43,6 +43,7 @@ type Build struct {
 	Number int    `json:"number"`
 	Url    string `json:"url"`
 
+	DisplayName     string `json:"displayName"`
 	FullDisplayName string `json:"fullDisplayName"`
 	Description     string `json:"description"`
 
