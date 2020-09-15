@@ -296,19 +296,26 @@ func (jenkins *Jenkins) GetQueue() (queue Queue, err error) {
 
 // GetArtifact return the content of a build artifact
 func (jenkins *Jenkins) GetArtifact(build Build, artifact Artifact) ([]byte, error) {
+	r, err := jenkins.OpenArtifact(build, artifact)
+	if err != nil {
+		return nil, err
+	}
+	defer r.Close()
+	return ioutil.ReadAll(r)
+}
+
+// OpenArtifact returns an io.ReadCloser for the contents of a build artifact
+func (jenkins *Jenkins) OpenArtifact(build Build, artifact Artifact) (io.ReadCloser, error) {
 	requestUrl := fmt.Sprintf("%s/artifact/%s", build.Url, artifact.RelativePath)
 	req, err := http.NewRequest("GET", requestUrl, nil)
 	if err != nil {
 		return nil, err
 	}
-
 	res, err := jenkins.sendRequest(req)
 	if err != nil {
 		return nil, err
 	}
-
-	defer res.Body.Close()
-	return ioutil.ReadAll(res.Body)
+	return res.Body, nil
 }
 
 // SetBuildDescription sets the description of a build
