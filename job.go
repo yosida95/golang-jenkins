@@ -1,6 +1,8 @@
 package gojenkins
 
-import "encoding/xml"
+import (
+	"encoding/xml"
+)
 
 type Artifact struct {
 	DisplayPath  string `json:"displayPath"`
@@ -21,8 +23,9 @@ type ScmChangeSetPath struct {
 type ChangeSetItem struct {
 	AffectedPaths []string           `json:"affectedPaths"`
 	CommitId      string             `json:"commitId"`
-	Timestamp     int                `json:"timestamp"`
+	Timestamp     int64              `json:"timestamp"`
 	Author        ScmAuthor          `json:"author"`
+	AuthorEmail   string             `json:"authorEmail"`
 	Comment       string             `json:"comment"`
 	Date          string             `json:"date"`
 	Id            string             `json:"id"`
@@ -40,12 +43,13 @@ type Build struct {
 	Number int    `json:"number"`
 	Url    string `json:"url"`
 
+	DisplayName     string `json:"displayName"`
 	FullDisplayName string `json:"fullDisplayName"`
 	Description     string `json:"description"`
 
-	Timestamp         int `json:"timestamp"`
-	Duration          int `json:"duration"`
-	EstimatedDuration int `json:"estimatedDuration"`
+	Timestamp         int64 `json:"timestamp"`
+	Duration          int64 `json:"duration"`
+	EstimatedDuration int64 `json:"estimatedDuration"`
 
 	Building bool   `json:"building"`
 	KeepLog  bool   `json:"keepLog"`
@@ -54,7 +58,8 @@ type Build struct {
 	Artifacts []Artifact `json:"artifacts"`
 	Actions   []Action   `json:"actions"`
 
-	ChangeSet ScmChangeSet `json:"changeSet"`
+	ChangeSet  ScmChangeSet   `json:"changeSet"`  // regular build
+	ChangeSets []ScmChangeSet `json:"changeSets"` // pipeline
 }
 
 type UpstreamCause struct {
@@ -64,13 +69,27 @@ type UpstreamCause struct {
 	UpstreamUrl      string `json:"upstreamUrl"`
 }
 
+type QueueItem struct {
+	Id           int    `json:"id"`
+	Blocked      bool   `json:"blocked"`
+	Buildable    bool   `json:"buildable"`
+	InQueueSince int64  `json:"inQueueSince"`
+	Params       string `json:"params"`
+	Stuck        bool   `json:"stuck"`
+	Url          string `json:"url"`
+	Why          string `json:"why"`
+}
+
 type Job struct {
 	Actions []Action `json:"actions"`
 	Name    string   `json:"name"`
 	Url     string   `json:"url"`
 	Color   string   `json:"color"`
 
+	Jobs []SubJobDescription `json:"jobs"`
+
 	Buildable    bool     `json:"buildable"`
+	InQueue      bool     `json:"inQueue"`
 	Builds       []Build  `json:"builds"`
 	DisplayName  string   `json:"displayName"`
 	Description  string   `json:"description"`
@@ -83,7 +102,15 @@ type Job struct {
 	LastUnstableBuild     Build `json:"lastUnstableBuild"`
 	LastUnsuccessfulBuild Build `json:"lastUnsuccessfulBuild"`
 
+	QueueItem QueueItem `json:"queueItem"`
+
 	Property []Property `json:"property"`
+}
+
+type SubJobDescription struct {
+	Name  string `json:"name"`
+	Url   string `json:"url"`
+	Color string `json:"color"`
 }
 
 type Health struct {

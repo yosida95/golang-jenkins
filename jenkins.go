@@ -10,6 +10,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"strings"
 )
 
 type HTTPStatusError struct {
@@ -47,7 +48,10 @@ func (jenkins *Jenkins) SetHTTPClient(client *http.Client) {
 }
 
 func (jenkins *Jenkins) buildUrl(path string, params url.Values) (requestUrl string) {
-	requestUrl = jenkins.baseUrl + path + "/api/json"
+	if !strings.HasPrefix(path, jenkins.baseUrl) {
+		path = jenkins.baseUrl + path
+	}
+	requestUrl = path + "/api/json"
 	if params != nil {
 		queryString := params.Encode()
 		if queryString != "" {
@@ -243,13 +247,25 @@ func (jenkins *Jenkins) GetJobConfig(name string) (job MavenJobItem, err error) 
 
 // GetBuild returns a number-th build result of specified job.
 func (jenkins *Jenkins) GetBuild(job Job, number int) (build Build, err error) {
-	err = jenkins.get(fmt.Sprintf("/job/%s/%d", job.Name, number), nil, &build)
+	err = jenkins.get(fmt.Sprintf("%s/%d", job.Url, number), nil, &build)
+	return
+}
+
+// GetBuildByJobName returns a number-th build result of specified job.
+func (jenkins *Jenkins) GetBuildByJobId(jobId string, number int) (build Build, err error) {
+	err = jenkins.get(fmt.Sprintf("/job/%s/%d", jobId, number), nil, &build)
 	return
 }
 
 // GetLastBuild returns the last build of specified job.
 func (jenkins *Jenkins) GetLastBuild(job Job) (build Build, err error) {
-	err = jenkins.get(fmt.Sprintf("/job/%s/lastBuild", job.Name), nil, &build)
+	err = jenkins.get(fmt.Sprintf("%s/lastBuild", job.Url), nil, &build)
+	return
+}
+
+// GetLastBuild returns the last build of specified job.
+func (jenkins *Jenkins) GetLastBuildByJobId(jobId string) (build Build, err error) {
+	err = jenkins.get(fmt.Sprintf("/job/%s/lastBuild", jobId), nil, &build)
 	return
 }
 
@@ -286,9 +302,9 @@ func (jenkins *Jenkins) CreateView(listView ListView) error {
 // Params can be nil.
 func (jenkins *Jenkins) Build(job Job, params url.Values) error {
 	if hasParams(job) {
-		return jenkins.post(fmt.Sprintf("/job/%s/buildWithParameters", job.Name), params, nil)
+		return jenkins.post(fmt.Sprintf("%s/buildWithParameters", job.Url), params, nil)
 	} else {
-		return jenkins.post(fmt.Sprintf("/job/%s/build", job.Name), params, nil)
+		return jenkins.post(fmt.Sprintf("%s/build", job.Url), params, nil)
 	}
 }
 
