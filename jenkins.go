@@ -12,6 +12,16 @@ import (
 	"net/url"
 )
 
+type HTTPStatusError struct {
+	URL    string
+	Code   int
+	Status string
+}
+
+func (e *HTTPStatusError) Error() string {
+	return fmt.Sprintf("bad http status: %d: %s", e.Code, e.Status)
+}
+
 type Auth struct {
 	Username string
 	ApiToken string
@@ -87,7 +97,18 @@ func (jenkins *Jenkins) sendRequest(req *http.Request) (*http.Response, error) {
 	if jenkins.auth != nil {
 		req.SetBasicAuth(jenkins.auth.Username, jenkins.auth.ApiToken)
 	}
-	return jenkins.client.Do(req)
+	res, err := jenkins.client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	if res.StatusCode != http.StatusOK {
+		return nil, &HTTPStatusError{
+			URL:    req.URL.String(),
+			Code:   res.StatusCode,
+			Status: res.Status,
+		}
+	}
+	return res, nil
 }
 
 func (jenkins *Jenkins) parseXmlResponse(resp *http.Response, body interface{}) (err error) {
