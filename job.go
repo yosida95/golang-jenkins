@@ -65,6 +65,7 @@ type UpstreamCause struct {
 }
 
 type Job struct {
+	Class   string   `json:"_class"`
 	Actions []Action `json:"actions"`
 	Name    string   `json:"name"`
 	Url     string   `json:"url"`
