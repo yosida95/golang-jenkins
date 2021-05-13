@@ -21,6 +21,7 @@ type Item struct {
 
 type Action struct {
 	Causes               []Cause               `json:"causes"`
+	Parameter            []Parameter           `json:"parameters"`
 	ParameterDefinitions []ParameterDefinition `json:"parameterDefinitions"`
 	Parameters           []Parameter           `json:"parameters"`
 }
@@ -36,6 +37,7 @@ type ParameterDefinition struct {
 	Name string `json:"name"`
 }
 
+// Parameter for a build
 type Parameter struct {
 	Name  string      `json:"name"`
 	Value interface{} `json:"value"`

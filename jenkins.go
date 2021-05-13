@@ -13,6 +13,16 @@ import (
 	"strings"
 )
 
+type HTTPStatusError struct {
+	URL    string
+	Code   int
+	Status string
+}
+
+func (e *HTTPStatusError) Error() string {
+	return fmt.Sprintf("bad http status: %d: %s", e.Code, e.Status)
+}
+
 type Auth struct {
 	Username string
 	ApiToken string
@@ -21,13 +31,20 @@ type Auth struct {
 type Jenkins struct {
 	auth    *Auth
 	baseUrl string
+	client  *http.Client
 }
 
 func NewJenkins(auth *Auth, baseUrl string) *Jenkins {
 	return &Jenkins{
 		auth:    auth,
 		baseUrl: baseUrl,
+		client:  http.DefaultClient,
 	}
+}
+
+// SetHTTPClient with timeouts or insecure transport, etc.
+func (jenkins *Jenkins) SetHTTPClient(client *http.Client) {
+	jenkins.client = client
 }
 
 func (jenkins *Jenkins) buildUrl(path string, params url.Values) (requestUrl string) {
@@ -42,11 +59,57 @@ func (jenkins *Jenkins) buildUrl(path string, params url.Values) (requestUrl str
 	return
 }
 
+// checkCrumb - checks if `useCrumb` is enabled and if so, retrieves crumb field and value and updates request header
+func (jenkins *Jenkins) checkCrumb(req *http.Request) (*http.Request, error) {
+
+	// api - store jenkins api useCrumbs response
+	api := struct {
+		UseCrumbs bool `json:"useCrumbs"`
+	}{}
+
+	err := jenkins.get("/api/json", url.Values{"tree": []string{"useCrumbs"}}, &api)
+	if err != nil {
+		return req, err
+	}
+
+	if !api.UseCrumbs {
+		// CSRF Protection is not enabled
+		return req, nil
+	}
+
+	// get crumb field and value
+	crumb := struct {
+		Crumb             string `json:"crumb"`
+		CrumbRequestField string `json:"crumbRequestField"`
+	}{}
+
+	err = jenkins.get("/crumbIssuer", nil, &crumb)
+	if err != nil {
+		return req, err
+	}
+
+	// update header
+	req.Header.Set(crumb.CrumbRequestField, crumb.Crumb)
+
+	return req, nil
+}
+
 func (jenkins *Jenkins) sendRequest(req *http.Request) (*http.Response, error) {
 	if jenkins.auth != nil {
 		req.SetBasicAuth(jenkins.auth.Username, jenkins.auth.ApiToken)
 	}
-	return http.DefaultClient.Do(req)
+	res, err := jenkins.client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	if res.StatusCode != http.StatusOK {
+		return nil, &HTTPStatusError{
+			URL:    req.URL.String(),
+			Code:   res.StatusCode,
+			Status: res.Status,
+		}
+	}
+	return res, nil
 }
 
 func (jenkins *Jenkins) parseXmlResponse(resp *http.Response, body interface{}) (err error) {
@@ -123,6 +186,10 @@ func (jenkins *Jenkins) post(path string, params url.Values, body interface{}) (
 	if params != nil {
 		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	}
+	
+	if _, err := jenkins.checkCrumb(req); err != nil {
+		return err
+	}
 
 	resp, err := jenkins.sendRequest(req)
 	if err != nil {
@@ -146,6 +213,10 @@ func (jenkins *Jenkins) postXml(path string, params url.Values, xmlBody io.Reade
 	req, err := http.NewRequest("POST", requestUrl, xmlBody)
 	if err != nil {
 		return
+	}
+
+	if _, err := jenkins.checkCrumb(req); err != nil {
+		return err
 	}
 
 	req.Header.Add("Content-Type", "application/xml")
