@@ -82,7 +82,7 @@ type Job struct {
 	LastSuccessfulBuild   Build `json:"lastSuccessfulBuild"`
 	LastUnstableBuild     Build `json:"lastUnstableBuild"`
 	LastUnsuccessfulBuild Build `json:"lastUnsuccessfulBuild"`
-
+        NextBuildNumber       int64    `json:"nextBuildNumber"`
 	Property []Property `json:"property"`
 }
 
