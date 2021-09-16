@@ -13,7 +13,7 @@ This is a API client of Jenkins API written in Go.
 -----
 Usage
 -----
-``import "github.com/yosida95/golang-jenkins"``
+``import "github.com/garudaen/golang-jenkins"``
 
 Configure authentication and create an instance of the client:
 
