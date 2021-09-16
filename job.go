@@ -83,6 +83,7 @@ type Job struct {
 	LastUnstableBuild     Build `json:"lastUnstableBuild"`
 	LastUnsuccessfulBuild Build `json:"lastUnsuccessfulBuild"`
         NextBuildNumber       int64    `json:"nextBuildNumber"`
+	InQueue bool `json:"inQueue"`
 	Property []Property `json:"property"`
 }
 
