@@ -262,6 +262,13 @@ func (jenkins *Jenkins) CreateJob(mavenJobItem MavenJobItem, jobName string) err
 	return jenkins.postXml("/createItem", params, reader, nil)
 }
 
+// CopyJob
+// Create a new job from copy an existing job
+func (jenkins *Jenkins) CopyJob(from, jobName string) error {
+	uri := fmt.Sprintf("/createItem?name=%s&mode=copy&from=%s", jobName, from)
+	return jenkins.postXml(uri, nil, nil, nil)
+}
+
 // Delete a job
 func (jenkins *Jenkins) DeleteJob(job Job) error {
 	return jenkins.post(fmt.Sprintf("/job/%s/doDelete", job.Name), nil, nil)
