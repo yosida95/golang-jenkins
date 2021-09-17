@@ -274,6 +274,18 @@ func (jenkins *Jenkins) DeleteJob(job Job) error {
 	return jenkins.post(fmt.Sprintf("/job/%s/doDelete", job.Name), nil, nil)
 }
 
+// EnableJob
+// Enable a job
+func (jenkins *Jenkins) EnableJob(job Job) error {
+	return jenkins.post(fmt.Sprintf("/job/%s/enable", job.Name), nil, nil)
+}
+
+// DisableJob
+// Disable a job
+func (jenkins *Jenkins) DisableJob(job Job) error {
+	return jenkins.post(fmt.Sprintf("/job/%s/disable", job.Name), nil, nil)
+}
+
 // Add job to view
 func (jenkins *Jenkins) AddJobToView(viewName string, job Job) error {
 	params := url.Values{"name": []string{job.Name}}
