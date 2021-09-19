@@ -262,9 +262,28 @@ func (jenkins *Jenkins) CreateJob(mavenJobItem MavenJobItem, jobName string) err
 	return jenkins.postXml("/createItem", params, reader, nil)
 }
 
+// CopyJob
+// Create a new job from copy an existing job
+func (jenkins *Jenkins) CopyJob(from, jobName string) error {
+	uri := fmt.Sprintf("/createItem?name=%s&mode=copy&from=%s", jobName, from)
+	return jenkins.postXml(uri, nil, nil, nil)
+}
+
 // Delete a job
 func (jenkins *Jenkins) DeleteJob(job Job) error {
 	return jenkins.post(fmt.Sprintf("/job/%s/doDelete", job.Name), nil, nil)
+}
+
+// EnableJob
+// Enable a job
+func (jenkins *Jenkins) EnableJob(job Job) error {
+	return jenkins.post(fmt.Sprintf("/job/%s/enable", job.Name), nil, nil)
+}
+
+// DisableJob
+// Disable a job
+func (jenkins *Jenkins) DisableJob(job Job) error {
+	return jenkins.post(fmt.Sprintf("/job/%s/disable", job.Name), nil, nil)
 }
 
 // Add job to view

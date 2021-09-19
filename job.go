@@ -76,14 +76,15 @@ type Job struct {
 	Description  string   `json:"description"`
 	HealthReport []Health `json:"healthReport"`
 
-	LastCompletedBuild    Build `json:"lastCompletedBuild"`
-	LastFailedBuild       Build `json:"lastFailedBuild"`
-	LastStableBuild       Build `json:"lastStableBuild"`
-	LastSuccessfulBuild   Build `json:"lastSuccessfulBuild"`
-	LastUnstableBuild     Build `json:"lastUnstableBuild"`
-	LastUnsuccessfulBuild Build `json:"lastUnsuccessfulBuild"`
-
-	Property []Property `json:"property"`
+	LastCompletedBuild    Build      `json:"lastCompletedBuild"`
+	LastFailedBuild       Build      `json:"lastFailedBuild"`
+	LastStableBuild       Build      `json:"lastStableBuild"`
+	LastSuccessfulBuild   Build      `json:"lastSuccessfulBuild"`
+	LastUnstableBuild     Build      `json:"lastUnstableBuild"`
+	LastUnsuccessfulBuild Build      `json:"lastUnsuccessfulBuild"`
+	NextBuildNumber       int64      `json:"nextBuildNumber"`
+	InQueue               bool       `json:"inQueue"`
+	Property              []Property `json:"property"`
 }
 
 type Health struct {
