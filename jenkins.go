@@ -2,6 +2,7 @@ package gojenkins
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"encoding/xml"
 	"errors"
@@ -156,6 +157,21 @@ func (jenkins *Jenkins) get(path string, params url.Values, body interface{}) (e
 	return jenkins.parseResponse(resp, body)
 }
 
+// getWithContext uses the provided context to perform an HTTP GET request and return the parsed response.
+func (jenkins *Jenkins) getWithContext(ctx context.Context, path string, params url.Values, body interface{}) (err error) {
+	requestUrl := jenkins.buildUrl(path, params)
+	req, err := http.NewRequestWithContext(ctx, "GET", requestUrl, nil)
+	if err != nil {
+		return
+	}
+
+	resp, err := jenkins.sendRequest(req)
+	if err != nil {
+		return
+	}
+	return jenkins.parseResponse(resp, body)
+}
+
 func (jenkins *Jenkins) getXml(path string, params url.Values, body interface{}) (err error) {
 	requestUrl := jenkins.buildUrl(path, params)
 	req, err := http.NewRequest("GET", requestUrl, nil)
@@ -186,7 +202,7 @@ func (jenkins *Jenkins) post(path string, params url.Values, body interface{}) (
 	if params != nil {
 		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	}
-	
+
 	if _, err := jenkins.checkCrumb(req); err != nil {
 		return err
 	}
@@ -246,6 +262,12 @@ func (jenkins *Jenkins) GetJob(name string, params url.Values) (job Job, err err
 	return
 }
 
+// GetJobWithContext uses the provided context and returns a job which has the specified name.
+func (jenkins *Jenkins) GetJobWithContext(ctx context.Context, name string, params url.Values) (job Job, err error) {
+	err = jenkins.getWithContext(ctx, fmt.Sprintf("/job/%s", name), params, &job)
+	return
+}
+
 //GetJobConfig returns a maven job, has the one used to create Maven job
 func (jenkins *Jenkins) GetJobConfig(name string) (job MavenJobItem, err error) {
 	err = jenkins.getXml(fmt.Sprintf("/job/%s/config.xml", name), nil, &job)
@@ -255,6 +277,12 @@ func (jenkins *Jenkins) GetJobConfig(name string) (job MavenJobItem, err error) 
 // GetBuild returns a number-th build result of specified job.
 func (jenkins *Jenkins) GetBuild(job Job, number int) (build Build, err error) {
 	err = jenkins.get(fmt.Sprintf("/job/%s/%d", job.Name, number), nil, &build)
+	return
+}
+
+// GetBuildWithContext uses the provided context and returns a number-th build result of specified job.
+func (jenkins *Jenkins) GetBuildWithContext(ctx context.Context, job Job, number int) (build Build, err error) {
+	err = jenkins.getWithContext(ctx, fmt.Sprintf("/job/%s/%d", job.Name, number), nil, &build)
 	return
 }
 
