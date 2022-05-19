@@ -143,21 +143,12 @@ func (jenkins *Jenkins) parseResponse(resp *http.Response, body interface{}) (er
 	return json.Unmarshal(data, body)
 }
 
+// get performs an HTTP GET request and returns the parsed response.
 func (jenkins *Jenkins) get(path string, params url.Values, body interface{}) (err error) {
-	requestUrl := jenkins.buildUrl(path, params)
-	req, err := http.NewRequest("GET", requestUrl, nil)
-	if err != nil {
-		return
-	}
-
-	resp, err := jenkins.sendRequest(req)
-	if err != nil {
-		return
-	}
-	return jenkins.parseResponse(resp, body)
+	return jenkins.getWithContext(context.Background(), path, params, body)
 }
 
-// getWithContext uses the provided context to perform an HTTP GET request and return the parsed response.
+// getWithContext uses the provided context to perform an HTTP GET request and returns the parsed response.
 func (jenkins *Jenkins) getWithContext(ctx context.Context, path string, params url.Values, body interface{}) (err error) {
 	requestUrl := jenkins.buildUrl(path, params)
 	req, err := http.NewRequestWithContext(ctx, "GET", requestUrl, nil)
