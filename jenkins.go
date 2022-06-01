@@ -103,7 +103,8 @@ func (jenkins *Jenkins) sendRequest(req *http.Request) (*http.Response, error) {
 	if err != nil {
 		return nil, err
 	}
-	if res.StatusCode != http.StatusOK {
+
+	if res.StatusCode >= http.StatusBadRequest {
 		return nil, &HTTPStatusError{
 			URL:    req.URL.String(),
 			Code:   res.StatusCode,
