@@ -96,7 +96,6 @@ func (jenkins *Jenkins) checkCrumb(req *http.Request) (*http.Request, error) {
 }
 
 func (jenkins *Jenkins) sendRequest(req *http.Request) (*http.Response, error) {
-
 	if jenkins.auth != nil {
 		req.SetBasicAuth(jenkins.auth.Username, jenkins.auth.ApiToken)
 	}
