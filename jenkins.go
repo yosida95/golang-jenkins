@@ -96,6 +96,7 @@ func (jenkins *Jenkins) checkCrumb(req *http.Request) (*http.Request, error) {
 }
 
 func (jenkins *Jenkins) sendRequest(req *http.Request) (*http.Response, error) {
+
 	if jenkins.auth != nil {
 		req.SetBasicAuth(jenkins.auth.Username, jenkins.auth.ApiToken)
 	}
@@ -103,7 +104,8 @@ func (jenkins *Jenkins) sendRequest(req *http.Request) (*http.Response, error) {
 	if err != nil {
 		return nil, err
 	}
-	if res.StatusCode != http.StatusOK {
+
+	if res.StatusCode >= http.StatusBadRequest {
 		return nil, &HTTPStatusError{
 			URL:    req.URL.String(),
 			Code:   res.StatusCode,
