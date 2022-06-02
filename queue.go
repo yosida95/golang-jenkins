@@ -21,7 +21,6 @@ type Item struct {
 
 type Action struct {
 	Causes               []Cause               `json:"causes"`
-	Parameter            []Parameter           `json:"parameters"`
 	ParameterDefinitions []ParameterDefinition `json:"parameterDefinitions"`
 	Parameters           []Parameter           `json:"parameters"`
 }
